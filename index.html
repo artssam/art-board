@@ -2,154 +2,515 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <title>작품 게시판</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;500;700;900&family=Do+Hyeon&family=Gothic+A1:wght@400;600;800&family=Jua&family=Hahmlet:wght@700;800&family=IBM+Plex+Sans+KR:wght@400;600&family=Gasoek+One&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
-  --wall:#E4E8E5; --ink:#1E2320; --muted:#5F6862; --mat:#FFFFFF; --line:#C9D0CB;
-  --accent:#2747C9; --note:#FFE45C; --danger:#B3261E;
+  --bg:#fff; --text:#262626; --muted:#737373; --line:#dbdbdb; --soft:#efefef; --card:#fff;
+  --blue:#0095f6; --blue-ink:#00376b; --tbg:#e7f3ff; --danger:#ed4956;
+  --ring:linear-gradient(45deg,#f9ce34 0%,#ee2a7b 50%,#6228d7 100%);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#000; --text:#f5f5f5; --muted:#a8a8a8; --line:#363636; --soft:#262626; --card:#000; --blue-ink:#e0f1ff; --tbg:#0d2742; color-scheme:dark}
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
-body{background:var(--wall);color:var(--ink);font-family:'IBM Plex Sans KR',system-ui,-apple-system,'Malgun Gothic',sans-serif;font-size:15px;line-height:1.55}
+body{background:var(--bg);color:var(--text);font-family:var(--font,'Pretendard Variable'),'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
 button,input,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-a{color:var(--accent)}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
-header{max-width:1280px;margin:0 auto;padding:28px 20px 6px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between}
-h1{font-family:'Gowun Batang',serif;font-weight:700;font-size:clamp(30px,5.5vw,48px);line-height:1.12;margin:0;letter-spacing:-.01em}
-.sub{color:var(--muted);margin:6px 0 0}
-.who{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.chip{background:var(--mat);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px}
+/* 상단바 */
+.top{position:sticky;top:0;z-index:15;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.topin{max-width:935px;margin:0 auto;height:58px;padding:0 14px;display:flex;align-items:center;gap:10px}
+.logo{font-family:var(--font-title,inherit);font-weight:800;font-size:21px;letter-spacing:-.04em;margin-right:auto;min-width:0;display:flex;align-items:center;gap:9px}
+.logo .lt{min-width:0;display:flex;flex-direction:column}
+.logo .word{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.logo .headsub{font-family:var(--font,inherit);font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.mark{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;background:var(--mark-bg,linear-gradient(45deg,#f9ce34 0%,#ee2a7b 50%,#6228d7 100%))}
+.mark svg{width:22px;height:22px}
+.mark.lg{width:58px;height:58px;border-radius:16px}
+.mark.lg svg{width:36px;height:36px}
+.newbtn{white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;border-radius:999px;background:var(--text);color:var(--bg);font-weight:700;font-size:14px}
+.newbtn svg{width:18px;height:18px}
+.who{display:flex;align-items:center}
+.me{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.av{flex:none;width:32px;height:32px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;color:#fff;letter-spacing:-.05em}
+.av.sm{width:28px;height:28px;font-size:10px}
+.ver{width:14px;height:14px;vertical-align:-2px;margin-left:3px}
 
-.btn{border:1px solid var(--ink);background:transparent;border-radius:8px;padding:8px 14px;font-size:14px;line-height:1.3}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-.btn.link{border-color:transparent;text-decoration:underline;padding:8px 4px}
-.btn.danger{border-color:var(--danger);color:var(--danger)}
+/* 반 = 스토리 */
+.stories{max-width:935px;margin:0 auto;padding:14px 10px 12px;display:flex;gap:12px;overflow-x:auto;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.story{display:flex;flex-direction:column;align-items:center;gap:5px;width:70px;flex:none;font-size:12px;color:var(--muted)}
+.story .ring{width:66px;height:66px;border-radius:50%;padding:2.5px;background:var(--line)}
+.story .ring span{width:100%;height:100%;border-radius:50%;background:var(--soft);border:3px solid var(--bg);display:grid;place-items:center;font-weight:800;font-size:15px;color:var(--text);letter-spacing:-.03em}
+.story[aria-pressed="true"]{color:var(--text);font-weight:700}
+.story[aria-pressed="true"] .ring{background:var(--ring)}
+
+.viewbar{max-width:935px;margin:0 auto;padding:0 14px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--line)}
+.sub{margin:0 auto 0 0;color:var(--muted);font-size:13px}
+.seg{display:flex}
+.seg button{padding:12px 10px;color:var(--muted);border-top:1px solid transparent;margin-top:-1px}
+.seg button[aria-pressed="true"]{color:var(--text);border-top-color:var(--text)}
+.seg svg{width:22px;height:22px;display:block}
+
+.teacherbar{max-width:935px;margin:0 auto;padding:10px 14px 0}
+.teacherbar .in{background:var(--tbg);color:var(--blue-ink);border-radius:12px;padding:8px 10px 8px 14px;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:13px}
+.teacherbar strong{margin-right:auto;display:flex;align-items:center;gap:4px}
+.teacherbar .btn{background:var(--bg);color:var(--text);padding:6px 12px;font-size:13px}
+
+main{max-width:935px;margin:0 auto;padding:6px 0 90px}
+
+/* 피드 */
+.feed{max-width:470px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.post{background:var(--card);border-bottom:1px solid var(--line);padding-bottom:12px}
+@media (min-width:500px){.feed{padding-top:10px}.post{border:1px solid var(--line);border-radius:10px;overflow:hidden}}
+.ph{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.ph b{font-weight:700;display:block;font-size:14px;line-height:1.2}
+.ph small{color:var(--muted);font-size:12px}
+.pimg{display:block;width:100%;background:var(--soft)}
+.pimg img{display:block;width:100%;height:auto;max-height:620px;object-fit:contain}
+.pact{display:flex;align-items:center;gap:14px;padding:10px 12px 6px}
+.pact button{display:flex;align-items:center;gap:6px;font-weight:700}
+.pact svg{width:24px;height:24px}
+.tag{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--blue-ink);background:var(--tbg);padding:3px 9px;border-radius:999px}
+.pcap{padding:0 12px;margin:0}
+.pcap b{font-weight:700;margin-right:6px}
+.pcap .ttl{font-weight:700;font-family:var(--font-ttl,inherit)}
+.pcap .d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;margin-top:2px}
+.prev{padding:0 12px;margin:4px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prev b{font-weight:700;margin-right:6px}
+.more{color:var(--muted);padding:6px 12px 0;font-size:14px;display:block}
+.when{color:var(--muted);font-size:11px;letter-spacing:.02em;padding:6px 12px 0}
+
+/* 격자 */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+@media (min-width:736px){.grid{gap:5px;padding-top:6px}}
+.g{position:relative;aspect-ratio:1;background:var(--soft);overflow:hidden;display:block}
+.g img{width:100%;height:100%;object-fit:cover;display:block}
+.g .ov{position:absolute;inset:0;background:rgba(0,0,0,.35);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:800;font-size:16px;opacity:0;transition:opacity .15s}
+.g .ov svg{width:20px;height:20px}
+.g:hover .ov,.g:focus-visible .ov{opacity:1}
+.g .fbmark{position:absolute;top:6px;right:6px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.g .fbmark .ver{width:18px;height:18px}
+
+.empty{text-align:center;padding:70px 24px;color:var(--muted)}
+.empty svg{width:62px;height:62px;color:var(--text)}
+.empty .big{font-size:22px;font-weight:800;color:var(--text);margin:12px 0 6px;letter-spacing:-.02em}
+.loading{text-align:center;color:var(--muted);padding:60px 0}
+
+/* 공통 버튼·입력 */
+.btn{border-radius:8px;padding:8px 16px;font-weight:700;font-size:14px;background:var(--soft);color:var(--text)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.link{background:none;color:var(--blue);padding:8px 4px}
+.btn.danger{background:none;color:var(--danger);border:1px solid var(--line)}
 .btn:disabled{opacity:.5;cursor:default}
 
-.teacherbar{max-width:1280px;margin:10px auto 0;padding:0 20px}
-.teacherbar .in{background:var(--note);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
-.teacherbar strong{margin-right:auto}
-
-nav.tabs{max-width:1280px;margin:0 auto;padding:14px 20px 0;display:flex;gap:6px;overflow-x:auto}
-.tab{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 14px;font-size:14px;white-space:nowrap}
-.tab[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--wall)}
-
-main{max-width:1280px;margin:0 auto;padding:22px 20px 130px}
-.wall{column-width:220px;column-gap:28px}
-.work{break-inside:avoid;display:block;width:100%;margin:0 0 30px;padding:0;border:0;background:none;text-align:left}
-.frame{background:var(--mat);padding:10px;box-shadow:0 1px 0 rgba(0,0,0,.06),0 10px 20px -14px rgba(0,0,0,.45)}
-.frame img{display:block;width:100%;height:auto;min-height:90px;background:#EEF0EE}
-.label{padding:10px 2px 0}
-.label .t{font-family:'Gowun Batang',serif;font-weight:700;font-size:16px;line-height:1.3;word-break:keep-all}
-.label .a{font-size:13px;color:var(--muted)}
-.meta{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-top:3px}
-.meta svg{width:14px;height:14px;vertical-align:-2px}
-.fb{background:var(--note);color:var(--ink);padding:0 6px;font-size:12px;font-weight:600}
-.empty{max-width:420px;padding:60px 0;color:var(--muted)}
-.empty p:first-child{font-family:'Gowun Batang',serif;font-size:22px;color:var(--ink);margin:0 0 6px}
-
-.fab{position:fixed;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:10;padding:14px 22px;border-radius:999px;font-size:16px;box-shadow:0 10px 24px -10px rgba(39,71,201,.7)}
-
-.overlay{position:fixed;inset:0;background:rgba(18,22,20,.6);display:none;align-items:flex-start;justify-content:center;padding:4vh 12px;overflow:auto;z-index:30}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;padding:16px;overflow:auto;z-index:30}
 .overlay.open{display:flex}
-.sheet{background:var(--mat);width:100%;max-width:520px;border-radius:12px;padding:22px;position:relative}
-.sheet.wide{max-width:1040px}
-.sheet h2{font-family:'Gowun Batang',serif;font-size:24px;line-height:1.25;margin:0 0 6px}
-.close{position:absolute;top:10px;right:10px;border:0;background:none;font-size:26px;line-height:1;padding:6px 10px}
-label.f{display:block;font-size:14px;font-weight:500;margin:14px 0 4px}
-input.f,textarea.f{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;font-size:16px}
-textarea.f{resize:vertical;min-height:80px}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-.hint{font-size:13px;color:var(--muted);margin:6px 0 0}
+.sheet{background:var(--card);color:var(--text);width:100%;max-width:400px;border-radius:14px;padding:26px 22px 22px;position:relative;margin:auto}
+.sheet.wide{max-width:720px}
+.sheet h2{font-size:17px;font-weight:700;margin:0 0 4px;text-align:center}
+.brandbig{font-weight:800;font-size:26px;letter-spacing:-.04em;text-align:center;margin:4px 0 16px}
+.close{position:absolute;top:6px;right:6px;font-size:28px;line-height:1;padding:6px 12px;color:var(--text);z-index:2}
+label.f{display:block;font-size:13px;font-weight:700;margin:14px 0 5px}
+input.f,textarea.f{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:var(--soft);font-size:16px}
+textarea.f{resize:vertical;min-height:72px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;align-items:center}
+.row .btn.primary{flex:1;padding:11px 16px}
+.hint{font-size:13px;color:var(--muted);margin:6px 0 0;text-align:inherit}
+#loginOv .hint,#teacherOv .hint{text-align:center}
 
-.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.pick label{border:1.5px dashed var(--line);border-radius:10px;padding:26px 10px;text-align:center;cursor:pointer;font-weight:600}
-.pick label span{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.pick label{background:var(--soft);border-radius:14px;padding:30px 10px;text-align:center;cursor:pointer;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pick label svg{width:32px;height:32px}
+.pick label span{font-weight:500;font-size:13px;color:var(--muted)}
 .pick input{position:absolute;width:1px;height:1px;opacity:0}
 
-.editor .stage{background:#2A302C;border-radius:8px;display:flex;justify-content:center;align-items:center;padding:10px;margin-top:12px}
-#preview{max-width:100%;max-height:52vh;display:block;touch-action:none}
+.editor .stage{background:#111;border-radius:10px;display:flex;justify-content:center;align-items:center;padding:8px;margin-top:14px}
+#preview{max-width:100%;max-height:50vh;display:block;touch-action:none}
 .tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.tools .btn{padding:6px 10px;font-size:13px}
-.tools .btn[aria-pressed="true"]{background:var(--ink);color:#fff}
-.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 18px;margin-top:10px}
-.sl{display:grid;grid-template-columns:56px 1fr 34px;align-items:center;gap:8px;font-size:13px}
-.sl input{width:100%;accent-color:var(--accent)}
-.sl output{text-align:right;color:var(--muted)}
-.cropbar{display:none;background:#F2F4F2;padding:8px 10px;border-radius:8px;margin-top:10px;font-size:13px;align-items:center;gap:8px;flex-wrap:wrap}
+.tools .btn{padding:7px 11px;font-size:13px;border-radius:999px}
+.tools .btn[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2px 18px;margin-top:10px}
+.sl{display:grid;grid-template-columns:52px 1fr 32px;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.sl input{width:100%;accent-color:var(--blue)}
+.sl output{text-align:right;color:var(--muted);font-weight:400}
+.cropbar{display:none;background:var(--soft);padding:8px 10px;border-radius:10px;margin-top:10px;font-size:13px;align-items:center;gap:8px;flex-wrap:wrap}
 .cropbar.on{display:flex}
 .cropbar span{margin-right:auto}
+#upOv .sheet h2{margin-bottom:0}
 
-.dgrid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:26px}
-@media (max-width:760px){.dgrid{grid-template-columns:1fr}}
-.dimg{background:#EEF0EE;padding:12px;align-self:start}
-.dimg img{display:block;width:100%;height:auto}
-.desc{white-space:pre-wrap;margin:10px 0 0}
-.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.acts a.btn{text-decoration:none;color:var(--ink)}
-h3{font-size:15px;margin:22px 0 4px}
-.c{border-top:1px solid #E5E8E6;padding:10px 0}
-.c.teacher{background:var(--note);border:0;padding:10px 12px;margin:8px 0}
-.c .h{display:flex;gap:8px;align-items:baseline;font-size:13px}
-.c .h b{font-weight:600}
-.c .h time{color:var(--muted)}
-.c.teacher .h time{color:#5a5220}
-.c .h button{margin-left:auto;border:0;background:none;font-size:12px;color:var(--muted);text-decoration:underline;padding:0}
-.c p{margin:2px 0 0;white-space:pre-wrap;word-break:break-word}
+/* 작품 상세 */
+#detailOv{padding:24px}
+.sheet.detail{max-width:1020px;padding:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);height:min(88vh,780px);border-radius:6px}
+.dimg{background:#000;display:flex;align-items:center;justify-content:center;min-height:0}
+.dimg img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.dside{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line)}
+.dside > .ph{border-bottom:1px solid var(--line);padding:12px 44px 12px 14px}
+.dscroll{flex:1;overflow:auto;padding:14px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px 42px}
+.acts .btn{padding:6px 12px;font-size:13px}
+.cm{display:flex;gap:12px;margin:0 0 16px}
+.cm > div{min-width:0;flex:1}
+.cm p{margin:0;word-break:break-word;white-space:pre-wrap}
+.cm b{font-weight:700;margin-right:6px}
+.cm .ttl{font-family:var(--font-ttl,inherit);font-weight:700;display:block;font-size:15px;margin:2px 0}
+.cm small{color:var(--muted);font-size:12px;display:flex;gap:12px;margin-top:5px}
+.cm small button{color:var(--muted);font-size:12px;font-weight:700}
+.cm.teacher .bub{background:var(--tbg);border-radius:14px;padding:9px 12px}
+.nocm{text-align:center;color:var(--muted);padding:24px 8px}
+.nocm strong{display:block;color:var(--text);font-size:18px;margin-bottom:4px}
+.dfoot{border-top:1px solid var(--line);padding:8px 14px;background:var(--card)}
+.cform{display:flex;align-items:center;gap:10px}
+.cform textarea{flex:1;border:0;background:none;resize:none;height:38px;min-height:38px;max-height:110px;padding:9px 0;overflow-y:auto;font-size:15px;outline:none;line-height:1.4}
+.cform button{color:var(--blue);font-weight:800;padding:6px 2px}
+.cform button:disabled{opacity:.4}
+@media (max-width:760px){
+  #detailOv{padding:0}
+  .sheet.detail{display:block;height:auto;min-height:100%;max-width:none;border-radius:0;overflow:visible}
+  .dimg img{max-height:65vh;width:100%}
+  .dside{border-left:0}
+  .dscroll{overflow:visible}
+  .dfoot{position:sticky;bottom:0;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  .detail .close{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+}
 
-.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:50;display:none;max-width:90vw}
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;z-index:50;display:none;max-width:90vw;text-align:center}
 .toast.on{display:block}
-@media (prefers-reduced-motion:no-preference){.overlay.open .sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(10px);opacity:0}}}
+@media (prefers-reduced-motion:no-preference){.overlay.open > .sheet{animation:pop .16s ease-out}@keyframes pop{from{transform:scale(.97);opacity:0}}}
+
+/* ===================== 로그인 첫 화면 ===================== */
+#loginOv{background:var(--bg);padding:0;align-items:stretch}
+#loginOv.open{display:flex}
+.lwrap{width:100%;min-height:100%;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr)}
+.mosaic{position:relative;overflow:hidden;background:var(--soft);min-height:100vh}
+.mtrack{columns:3;column-gap:10px;padding:10px;animation:drift 60s linear infinite}
+.mtrack img,.mtrack i{display:block;width:100%;margin:0 0 10px;break-inside:avoid;border-radius:var(--m-radius,8px)}
+.mtrack i{aspect-ratio:3/4}
+@keyframes drift{to{transform:translateY(-50%)}}
+@media (prefers-reduced-motion:reduce){.mtrack{animation:none}}
+.mosaic::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,var(--bg))}
+.lform{align-self:center;justify-self:center;width:100%;max-width:380px;padding:40px 28px calc(40px + env(safe-area-inset-bottom,0px))}
+.kicker{margin:0 0 6px;font-size:15px;font-weight:800;letter-spacing:.02em;color:var(--blue)}
+.lform .brandbig{display:flex;align-items:center;gap:14px;text-align:left;font-family:var(--font-title,inherit);font-size:clamp(34px,5vw,46px);line-height:1.1;margin:0 0 10px}
+.lform .lsub{color:var(--muted);margin:0 0 26px;font-size:15px}
+.lform h2{display:none}
+.lform .row{flex-direction:column;align-items:stretch}
+.lform .row .btn.primary{padding:13px 16px;font-size:15px}
+.lform .fine{font-size:12px;color:var(--muted);margin:18px 0 0}
+@media (max-width:760px){
+  .lwrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .mosaic{min-height:0;height:34vh}
+  .mtrack{columns:4;column-gap:6px;padding:6px}
+  .mtrack img,.mtrack i{margin-bottom:6px}
+  .mosaic::after{background:linear-gradient(180deg,transparent 50%,var(--bg))}
+  .lform{padding-top:8px}
+}
+
+/* 글 템플릿 */
+.dlabel{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.dlabel .btn.link{font-size:13px;padding:4px 2px}
+
+/* PIN·명단 */
+.lstep{font-weight:800;font-size:18px;margin:0}
+.rbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:22px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
+.rbar select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);margin-right:auto}
+.rtable{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.rtable table{width:100%;border-collapse:collapse;font-size:14px}
+.rtable th,.rtable td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.rtable th{position:sticky;top:0;background:var(--soft);font-size:12px;color:var(--muted)}
+.rtable td.act{text-align:right}
+.rtable td.act button{font-size:12px;font-weight:700;color:var(--blue);margin-left:10px}
+.rtable td.act button.del{color:var(--danger)}
+.pinbadge{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;background:var(--tbg);color:var(--blue-ink);padding:2px 7px;border-radius:5px}
+.ok{color:var(--muted)}
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:10mm}
+  html,body{background:#fff!important;background-image:none!important;padding:0!important}
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block!important;font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;color:#000}
+  .ppage{display:grid;grid-template-columns:95mm 95mm;grid-template-rows:repeat(5,55mm);width:190mm;break-after:page;page-break-after:always}
+  .ppage:last-child{break-after:auto;page-break-after:auto}
+  .slip{box-sizing:border-box;height:55mm;border:.3mm dashed #999;padding:5mm 5mm 4mm 6mm;display:flex;gap:4mm;align-items:center;overflow:hidden;break-inside:avoid}
+  .slip .st{flex:1;min-width:0;display:flex;flex-direction:column;height:100%}
+  .slip .brand{font-size:8.5pt;font-weight:700;color:#444}
+  .slip .who{font-size:15pt;font-weight:800;margin-top:2.5mm;letter-spacing:-.02em}
+  .slip .lbl{font-size:8pt;color:#555;margin-top:2mm}
+  .slip .pin{font-family:Consolas,Menlo,monospace;font-size:24pt;font-weight:800;letter-spacing:.18em;line-height:1.1}
+  .slip .how{font-size:7.5pt;color:#333;margin-top:auto;line-height:1.35}
+  .slip .qr{flex:none;width:31mm;text-align:center;font-size:7pt;color:#444}
+  .slip .qr svg{width:31mm;height:31mm;display:block}
+}
+
+
+/* 로고 마크 (디자인별) */
+[data-skin="pop"] .mark{background:var(--blue);border:2px solid var(--line);box-shadow:2px 2px 0 var(--line)}
+[data-skin="pop"] .mark.lg{box-shadow:4px 4px 0 var(--line)}
+[data-skin="gallery"] .mark{background:var(--text);color:var(--bg);border-radius:0}
+[data-skin="sketch"] .mark{background:none;color:var(--blue);transform:rotate(-8deg)}
+[data-skin="sketch"] .mark svg{width:30px;height:30px;stroke-width:2.4}
+[data-skin="sketch"] .mark.lg svg{width:52px;height:52px}
+[data-skin="sketch"] .logo .word{position:relative}
+[data-skin="sketch"] .logo .word,[data-skin="sketch"] #loginBrand{text-decoration:underline wavy var(--blue) 2px;text-underline-offset:5px}
+[data-skin="gallery"] .kicker{color:var(--ver)}
+
+/* ===================== 디자인 1: 팝 ===================== */
+:root[data-skin="pop"]{--bg:#EFEBFF;--text:#17141F;--muted:#5B5670;--line:#17141F;--soft:#E2DCFA;--card:#fff;--blue:#FF5C39;--blue-ink:#17141F;--tbg:#FFE45C;--ver:#FF5C39;
+  --font:'Noto Sans KR';--font-title:'Black Han Sans';--font-ttl:'Black Han Sans';--m-radius:14px}
+@media (prefers-color-scheme:dark){:root[data-skin="pop"]:not([data-theme="light"]){--bg:#1A1626;--text:#F3F0FF;--muted:#ADA6C7;--line:#F3F0FF;--soft:#2A2440;--card:#221D33;--blue-ink:#17141F}}
+:root[data-skin="pop"][data-theme="dark"]{--bg:#1A1626;--text:#F3F0FF;--muted:#ADA6C7;--line:#F3F0FF;--soft:#2A2440;--card:#221D33;--blue-ink:#17141F}
+[data-skin="pop"] .top{border-bottom:2px solid var(--line)}
+[data-skin="pop"] .logo{font-weight:400;font-size:clamp(20px,5.5vw,25px)}
+[data-skin="pop"] .newbtn{background:var(--blue);color:#fff;border:2px solid var(--line);box-shadow:3px 3px 0 var(--line)}
+[data-skin="pop"] .story .ring{background:var(--card);border:2px solid var(--line);padding:3px}
+[data-skin="pop"] .story .ring span{border:0;background:var(--soft);font-family:'Black Han Sans';font-weight:400}
+[data-skin="pop"] .story[aria-pressed="true"] .ring{background:var(--tbg);box-shadow:3px 3px 0 var(--line)}
+[data-skin="pop"] .story[aria-pressed="true"] .ring span{background:var(--blue);color:#fff}
+[data-skin="pop"] .viewbar{border-top:2px solid var(--line)}
+[data-skin="pop"] .feed{padding:16px 14px 0;gap:22px}
+[data-skin="pop"] .post{border:2px solid var(--line);border-radius:20px;box-shadow:5px 5px 0 var(--line);overflow:hidden;padding-bottom:14px}
+[data-skin="pop"] .pimg{border-bottom:2px solid var(--line);border-top:2px solid var(--line)}
+[data-skin="pop"] .pcap .ttl{font-size:18px;font-weight:400;display:block}
+[data-skin="pop"] .tag{background:var(--tbg);border:1.5px solid #17141F;color:#17141F}
+[data-skin="pop"] .grid{gap:12px;padding:14px 18px 18px 14px}
+[data-skin="pop"] .g{border:2px solid var(--line);border-radius:16px;box-shadow:4px 4px 0 var(--line)}
+[data-skin="pop"] .btn{border:2px solid var(--line)}
+[data-skin="pop"] .btn.primary{background:var(--blue);box-shadow:3px 3px 0 var(--line)}
+[data-skin="pop"] .btn.link{border:0}
+[data-skin="pop"] .sheet{border:2px solid var(--line);box-shadow:6px 6px 0 var(--line);border-radius:20px}
+[data-skin="pop"] .sheet.detail{box-shadow:none}
+[data-skin="pop"] input.f,[data-skin="pop"] textarea.f{border:2px solid var(--line);background:var(--card);border-radius:12px}
+[data-skin="pop"] .cm.teacher .bub{background:var(--tbg);color:#17141F;border:2px solid #17141F;border-radius:16px}
+[data-skin="pop"] .cm.teacher .bub b{color:#17141F}
+[data-skin="pop"] .teacherbar .in{background:var(--tbg);color:#17141F;border:2px solid var(--line)}
+[data-skin="pop"] .mosaic{background:var(--tbg)}
+[data-skin="pop"] .mtrack img,[data-skin="pop"] .mtrack i{border:2px solid #17141F}
+[data-skin="pop"] .lform .brandbig{font-weight:400}
+
+/* ===================== 디자인 2: 갤러리 ===================== */
+:root[data-skin="gallery"]{--bg:#F3F3F0;--text:#141414;--muted:#6C6C67;--line:#D4D4CF;--soft:#E7E7E3;--card:#F3F3F0;--blue:#141414;--blue-ink:#4A3D1C;--tbg:#ECE4D1;--ver:#A9822F;
+  --font:'Noto Sans KR';--font-title:'Nanum Myeongjo';--font-ttl:'Nanum Myeongjo';--m-radius:0}
+@media (prefers-color-scheme:dark){:root[data-skin="gallery"]:not([data-theme="light"]){--bg:#121212;--text:#EDEDE8;--muted:#9A9A94;--line:#2E2E2C;--soft:#1E1E1C;--card:#121212;--blue:#EDEDE8;--blue-ink:#F1E3BE;--tbg:#2A2416}}
+:root[data-skin="gallery"][data-theme="dark"]{--bg:#121212;--text:#EDEDE8;--muted:#9A9A94;--line:#2E2E2C;--soft:#1E1E1C;--card:#121212;--blue:#EDEDE8;--blue-ink:#F1E3BE;--tbg:#2A2416}
+[data-skin="gallery"] .logo{font-size:24px;letter-spacing:-.02em}
+[data-skin="gallery"] .newbtn{border-radius:0;background:var(--text);color:var(--bg)}
+[data-skin="gallery"] .story{width:64px}
+[data-skin="gallery"] .story .ring{border-radius:0;background:none;border:1px solid var(--line);padding:3px;width:58px;height:58px}
+[data-skin="gallery"] .story .ring span{border-radius:0;border:0;font-family:'Nanum Myeongjo';font-size:16px}
+[data-skin="gallery"] .story[aria-pressed="true"] .ring{border-color:var(--text);background:none}
+[data-skin="gallery"] .story[aria-pressed="true"] .ring span{background:var(--text);color:var(--bg)}
+[data-skin="gallery"] .av{border-radius:0}
+[data-skin="gallery"] .feed{max-width:560px;gap:56px;padding-top:28px}
+[data-skin="gallery"] .post{border:0;background:none;padding:0}
+[data-skin="gallery"] .ph{display:none}
+[data-skin="gallery"] .pimg{background:var(--soft);padding:22px}
+[data-skin="gallery"] .pimg img{box-shadow:0 14px 26px -16px rgba(0,0,0,.55)}
+[data-skin="gallery"] .pcap{padding:14px 0 0;display:grid;grid-template-columns:1fr;gap:2px}
+[data-skin="gallery"] .pcap b{order:2;font-weight:400;color:var(--muted);font-size:13px}
+[data-skin="gallery"] .pcap .ttl{order:1;font-size:21px;font-weight:800}
+[data-skin="gallery"] .pcap .d{order:3;color:var(--muted)}
+[data-skin="gallery"] .pact{padding:10px 0 0;border-top:1px solid var(--line);margin-top:12px}
+[data-skin="gallery"] .prev,[data-skin="gallery"] .more,[data-skin="gallery"] .when{padding-left:0;padding-right:0}
+[data-skin="gallery"] .tag{background:none;border:1px solid var(--ver);color:var(--blue-ink);border-radius:0}
+[data-skin="gallery"] .grid{gap:22px;padding:22px 14px}
+[data-skin="gallery"] .g{background:var(--soft);padding:12px}
+[data-skin="gallery"] .btn,[data-skin="gallery"] .sheet,[data-skin="gallery"] input.f,[data-skin="gallery"] textarea.f,[data-skin="gallery"] .tools .btn,[data-skin="gallery"] .teacherbar .in,[data-skin="gallery"] .pick label{border-radius:0}
+[data-skin="gallery"] .btn.primary{background:var(--text);color:var(--bg)}
+[data-skin="gallery"] .btn.link{color:var(--text);text-decoration:underline}
+[data-skin="gallery"] .cform button{color:var(--text)}
+[data-skin="gallery"] .cm.teacher .bub{border-radius:0;background:var(--tbg);border-left:3px solid var(--ver)}
+[data-skin="gallery"] .kicker{color:var(--muted)}
+[data-skin="gallery"] .mtrack{columns:2;column-gap:28px;padding:28px}
+[data-skin="gallery"] .mtrack img,[data-skin="gallery"] .mtrack i{margin-bottom:28px;box-shadow:0 14px 24px -16px rgba(0,0,0,.6)}
+[data-skin="gallery"] .lform .brandbig{font-weight:800}
+
+/* ===================== 디자인 3: 스케치북 ===================== */
+:root[data-skin="sketch"]{--bg:#FAF7EF;--text:#2B2A28;--muted:#7A7468;--line:#E0D9C8;--soft:#F0EADB;--card:#fff;--blue:#2E5BFF;--blue-ink:#3B3000;--tbg:#FFF1A6;--ver:#2E5BFF;
+  --font:'Gowun Dodum';--font-title:'Gaegu';--font-ttl:'Gaegu';--m-radius:3px}
+@media (prefers-color-scheme:dark){:root[data-skin="sketch"]:not([data-theme="light"]){--bg:#1F1E1B;--text:#F2EEE4;--muted:#ABA493;--line:#3A3730;--soft:#2A2824;--card:#2C2A26;--blue:#7C9BFF;--tbg:#5C5320;--blue-ink:#FFF6C9}}
+:root[data-skin="sketch"][data-theme="dark"]{--bg:#1F1E1B;--text:#F2EEE4;--muted:#ABA493;--line:#3A3730;--soft:#2A2824;--card:#2C2A26;--blue:#7C9BFF;--tbg:#5C5320;--blue-ink:#FFF6C9}
+[data-skin="sketch"] body{background-image:radial-gradient(var(--line) 1px,transparent 1.2px);background-size:22px 22px}
+[data-skin="sketch"] .top{background:var(--bg);border-bottom:2px dashed var(--line)}
+[data-skin="sketch"] .logo{font-size:30px;font-weight:700;letter-spacing:0}
+[data-skin="sketch"] .newbtn{background:var(--blue);color:#fff;font-family:'Gaegu';font-size:19px;padding:5px 14px 5px 10px}
+[data-skin="sketch"] .story .ring{background:none;border:2px dashed var(--muted);padding:3px}
+[data-skin="sketch"] .story .ring span{border:0;font-family:'Gaegu';font-size:19px;font-weight:700}
+[data-skin="sketch"] .story[aria-pressed="true"] .ring{border:2.5px solid var(--blue)}
+[data-skin="sketch"] .story[aria-pressed="true"]{color:var(--blue)}
+[data-skin="sketch"] .viewbar{border-top:2px dashed var(--line);background:var(--bg)}
+[data-skin="sketch"] .feed{gap:34px;padding:26px 16px 0}
+[data-skin="sketch"] .post{position:relative;background:var(--card);border:0;border-radius:3px;padding:12px 12px 16px;box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 18px -10px rgba(0,0,0,.35);overflow:visible}
+[data-skin="sketch"] .post:nth-child(odd){transform:rotate(-.7deg)}
+[data-skin="sketch"] .post:nth-child(even){transform:rotate(.6deg)}
+[data-skin="sketch"] .post::before{content:"";position:absolute;top:-11px;left:50%;width:92px;height:24px;margin-left:-46px;background:rgba(232,214,160,.75);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+[data-skin="sketch"] .ph,[data-skin="sketch"] .pact,[data-skin="sketch"] .pcap,[data-skin="sketch"] .prev,[data-skin="sketch"] .more,[data-skin="sketch"] .when{padding-left:2px;padding-right:2px}
+[data-skin="sketch"] .pimg{border-radius:2px;overflow:hidden}
+[data-skin="sketch"] .pcap .ttl{font-size:22px;display:block;line-height:1.2}
+[data-skin="sketch"] .tag{background:var(--tbg);color:var(--blue-ink);border-radius:2px;transform:rotate(-2deg)}
+[data-skin="sketch"] .grid{gap:14px;padding:22px 16px}
+[data-skin="sketch"] .g{background:var(--card);padding:7px 7px 22px;border-radius:2px;box-shadow:0 6px 14px -8px rgba(0,0,0,.45);overflow:visible}
+[data-skin="sketch"] .g img{aspect-ratio:1;height:auto}
+[data-skin="sketch"] .g:nth-child(3n+1){transform:rotate(-1.2deg)}
+[data-skin="sketch"] .g:nth-child(3n+2){transform:rotate(.9deg)}
+[data-skin="sketch"] .g .ov{inset:7px 7px 22px}
+[data-skin="sketch"] .cm.teacher .bub{background:var(--tbg);color:var(--blue-ink);border-radius:2px;transform:rotate(-.6deg);box-shadow:0 4px 10px -6px rgba(0,0,0,.4)}
+[data-skin="sketch"] .cm.teacher .bub b{color:var(--blue-ink)}
+[data-skin="sketch"] .btn{border-radius:999px}
+[data-skin="sketch"] .sheet{border-radius:6px}
+[data-skin="sketch"] input.f,[data-skin="sketch"] textarea.f{background:var(--card);border:0;border-bottom:2px solid var(--line);border-radius:0;padding-left:2px}
+[data-skin="sketch"] .lform .brandbig{font-weight:700;font-size:clamp(40px,6vw,56px);letter-spacing:0}
+[data-skin="sketch"] .mosaic{background:none}
+[data-skin="sketch"] .mosaic::after{display:none}
+[data-skin="sketch"] .mtrack{column-gap:18px;padding:22px}
+[data-skin="sketch"] .mtrack img,[data-skin="sketch"] .mtrack i{background:#fff;padding:6px 6px 18px;margin-bottom:22px;box-shadow:0 6px 14px -8px rgba(0,0,0,.45)}
+[data-skin="sketch"] .mtrack > :nth-child(odd){transform:rotate(-2deg)}
+[data-skin="sketch"] .mtrack > :nth-child(even){transform:rotate(1.6deg)}
+@media (max-width:760px){[data-skin="sketch"] .mosaic{border-bottom:2px dashed var(--line)}}
+
+/* ===================== 글꼴 (FONT 설정) ===================== */
+:root[data-font="dohyeon"]{--font:'Gothic A1';--font-title:'Do Hyeon';--font-ttl:'Do Hyeon';--tw:400}
+:root[data-font="jua"]{--font:'Gowun Dodum';--font-title:'Jua';--font-ttl:'Jua';--tw:400}
+:root[data-font="hahmlet"]{--font:'IBM Plex Sans KR';--font-title:'Hahmlet';--font-ttl:'Hahmlet';--tw:800}
+:root[data-font="gasoek"]{--font:'Noto Sans KR';--font-title:'Gasoek One';--font-ttl:'Gothic A1';--tw:400}
+:root[data-font] .logo,:root[data-font] .lform .brandbig,:root[data-font] #loginBrand{font-weight:var(--tw)!important;letter-spacing:-.01em}
+:root[data-font] .pcap .ttl,:root[data-font] .cm .ttl{font-weight:var(--tw)}
+:root[data-font="gasoek"] .pcap .ttl,:root[data-font="gasoek"] .cm .ttl{font-weight:800}
+:root[data-font] .story .ring span{font-family:var(--font-title)!important;font-weight:var(--tw)}
+:root[data-font] .newbtn,:root[data-font] .btn,:root[data-font] input,:root[data-font] textarea{font-family:var(--font)}
+:root[data-font] .logo .headsub{font-family:var(--font)}
+#loginBrand{white-space:nowrap}
+.lform .brandbig{font-size:clamp(30px,4.6vw,42px)}
+[data-skin="sketch"] .lform .brandbig{font-size:clamp(34px,5vw,48px)}
 </style>
 
 </head>
 <body>
 
-<header>
-  <div>
-    <h1 id="boardTitle"></h1>
-    <p class="sub" id="boardSub"></p>
+<header class="top">
+  <div class="topin">
+    <div class="logo"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M6.5 16.5c1.8-2.8 3.3-2.8 4.8 0s3.1 2.6 5.2-1.2"/><circle cx="15.6" cy="8.4" r="1.7" fill="currentColor" stroke="none"/></svg></span><span class="lt"><span class="word" id="boardTitle"></span><span class="headsub" id="headSub"></span></span></div>
+    <button class="newbtn" id="fab" aria-label="작품 올리기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>올리기</button>
+    <div class="who" id="who"></div>
   </div>
-  <div class="who" id="who"></div>
 </header>
 
 <div class="teacherbar" id="teacherbar" hidden>
   <div class="in">
-    <strong>교사 모드</strong>
-    <button class="btn" id="zipBtn">이 탭 사진 모두 내려받기</button>
-    <button class="btn link" id="pwBtn">비밀번호 바꾸기</button>
-    <button class="btn link" id="teacherOut">교사 모드 끝내기</button>
+    <strong><svg class="ver" viewBox="0 0 16 16" aria-label="선생님 인증"><circle cx="8" cy="8" r="8" style="fill:var(--ver,#0095f6)"/><path d="M4.6 8.2l2.2 2.2 4.6-4.7" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> 교사 모드</strong>
+    <button class="btn" id="tplBtn">글 템플릿</button>
+    <button class="btn" id="rosterBtn">학생 명단·PIN</button>
+    <button class="btn" id="zipBtn">이 반 사진 모두 내려받기</button>
+    <button class="btn" id="pwBtn">비밀번호 바꾸기</button>
+    <button class="btn" id="teacherOut">나가기</button>
   </div>
 </div>
 
-<nav class="tabs" id="tabs" aria-label="반 선택"></nav>
-<main><div class="wall" id="wall"><p class="hint">작품을 불러오는 중…</p></div></main>
+<nav class="stories" id="tabs" aria-label="반 선택"></nav>
+<div class="viewbar">
+  <p class="sub" id="boardSub"></p>
+  <div class="seg" role="group" aria-label="보기 방식">
+    <button id="vFeed" aria-label="피드로 보기" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="11" rx="1.5"/><path d="M4 18h16M4 21h10"/></svg></button>
+    <button id="vGrid" aria-label="격자로 보기" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button>
+  </div>
+</div>
+<main><div id="wall"><p class="loading">작품을 불러오는 중…</p></div></main>
 
-<button class="btn primary fab" id="fab">작품 올리기</button>
 <div class="toast" id="toast" role="status"></div>
 
 <!-- 학생 확인 -->
 <div class="overlay" id="loginOv">
-  <div class="sheet" role="dialog" aria-labelledby="loginT">
-    <h2 id="loginT">누구인지 알려 주세요</h2>
-    <p class="hint">올린 사진은 학번과 이름으로 저장되고, 댓글에도 표시돼요.</p>
-    <label class="f" for="inId">학번</label>
-    <input class="f" id="inId" inputmode="numeric" placeholder="예: 20701" autocomplete="off">
-    <label class="f" for="inName">이름</label>
-    <input class="f" id="inName" placeholder="예: 홍길동" autocomplete="off">
-    <div class="row">
-      <button class="btn primary" id="loginGo">시작하기</button>
-      <button class="btn link" id="toTeacher">선생님이신가요?</button>
+  <div class="lwrap">
+    <div class="mosaic" aria-hidden="true"><div class="mtrack" id="mosaic"></div></div>
+    <div class="lform" role="dialog" aria-labelledby="loginBrand">
+      <div class="brandbig"><span class="mark lg" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M6.5 16.5c1.8-2.8 3.3-2.8 4.8 0s3.1 2.6 5.2-1.2"/><circle cx="15.6" cy="8.4" r="1.7" fill="currentColor" stroke="none"/></svg></span><span id="loginBrand"></span></div>
+      <p class="kicker" id="loginKicker"></p>
+      <p class="lsub" id="loginSub"></p>
+      <h2 id="loginT">누구인지 알려 주세요</h2>
+      <div id="stepLogin">
+        <label class="f" for="inId">학번</label>
+        <input class="f" id="inId" inputmode="numeric" placeholder="예: 20701" autocomplete="off">
+        <label class="f" for="inName">이름</label>
+        <input class="f" id="inName" placeholder="예: 홍길동" autocomplete="off">
+        <label class="f" for="inPin">PIN</label>
+        <input class="f" id="inPin" type="password" inputmode="numeric" maxlength="6" placeholder="숫자 4~6자리" autocomplete="off">
+        <div class="row">
+          <button class="btn primary" id="loginGo">입장하기</button>
+          <button class="btn link" id="toTeacher">선생님이신가요?</button>
+        </div>
+        <p class="fine">처음 들어올 때는 선생님께 받은 PIN을 입력하세요. PIN을 잊었으면 선생님께 초기화를 부탁하세요.</p>
+      </div>
+      <div id="stepNewPin" hidden>
+        <p class="lstep">나만 아는 PIN 만들기</p>
+        <p class="fine" style="margin-top:4px">친구가 알 수 없는 숫자 4~6자리로 정해요. 다음부터는 이 PIN으로 들어와요.</p>
+        <label class="f" for="newPin1">새 PIN</label>
+        <input class="f" id="newPin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+        <label class="f" for="newPin2">새 PIN 한 번 더</label>
+        <input class="f" id="newPin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+        <div class="row"><button class="btn primary" id="newPinGo">저장하고 시작하기</button></div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- 내 계정 -->
+<div class="overlay" id="meOv">
+  <div class="sheet" role="dialog" aria-labelledby="meT">
+    <button class="close" data-close aria-label="닫기">×</button>
+    <h2 id="meT"></h2>
+    <label class="f" for="mePin1">새 PIN</label>
+    <input class="f" id="mePin1" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+    <label class="f" for="mePin2">새 PIN 한 번 더</label>
+    <input class="f" id="mePin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
+    <div class="row"><button class="btn primary" id="mePinGo">PIN 바꾸기</button></div>
+    <div class="row"><button class="btn" id="logoutBtn" style="flex:1">로그아웃</button></div>
+  </div>
+</div>
+
+<!-- 글 템플릿 (교사) -->
+<div class="overlay" id="tplOv">
+  <div class="sheet wide" role="dialog" aria-labelledby="tplT" style="max-width:600px">
+    <button class="close" data-close aria-label="닫기">×</button>
+    <h2 id="tplT">작품 설명 템플릿</h2>
+    <p class="hint" style="text-align:center">학생이 작품을 올릴 때 설명 칸에 이 내용이 미리 채워져요. 학생은 빈칸을 채워서 올려요.</p>
+    <label class="f" for="tplIn">템플릿 내용</label>
+    <textarea class="f" id="tplIn" rows="9" maxlength="600" placeholder="예)&#10;■ 작품 의도: &#10;■ 사용한 재료와 기법: &#10;■ 가장 신경 쓴 부분: &#10;■ 제작하며 느낀 점: "></textarea>
+    <p class="hint"><span id="tplCount">0</span>/600자 · 비워 두고 저장하면 템플릿 없이 빈 칸으로 올라가요.</p>
+    <div class="row">
+      <button class="btn" id="tplExample">예시 넣기</button>
+      <button class="btn primary" id="tplSave">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 학생 명단 (교사) -->
+<div class="overlay" id="rosterOv">
+  <div class="sheet wide" role="dialog" aria-labelledby="rT">
+    <button class="close" data-close aria-label="닫기">×</button>
+    <h2 id="rT">학생 명단과 PIN</h2>
+    <label class="f" for="rosterIn">명단 붙여 넣기</label>
+    <textarea class="f" id="rosterIn" rows="5" placeholder="엑셀에서 학번·이름 두 칸을 복사해 붙여 넣으세요.&#10;20701 홍길동&#10;20702 김하늘"></textarea>
+    <p class="hint">새 학생에게는 4자리 초기 PIN이 자동으로 만들어져요. 이미 있는 학번은 건너뛰어요.</p>
+    <div class="row"><button class="btn primary" id="rosterAdd">명단에 추가</button></div>
+    <div class="rbar">
+      <select id="rosterClass" aria-label="반 고르기"></select>
+      <button class="btn" id="rosterPrint">PIN 쪽지 인쇄</button>
+      <button class="btn" id="rosterCopy">표로 복사</button>
+    </div>
+    <div class="rtable" id="rosterList"><p class="hint">불러오는 중…</p></div>
+  </div>
+</div>
+<div id="printArea" aria-hidden="true"></div>
 
 <!-- 교사 로그인 -->
 <div class="overlay" id="teacherOv">
@@ -181,8 +542,8 @@ h3{font-size:15px;margin:22px 0 4px}
     <div id="stepPick">
       <p class="hint">작품 전체가 잘 보이도록, 밝은 곳에서 정면으로 찍어 주세요.</p>
       <div class="pick">
-        <label>카메라로 찍기<span>지금 바로 촬영</span><input type="file" accept="image/*" capture="environment" id="camIn"></label>
-        <label>사진 고르기<span>앨범·파일에서 선택</span><input type="file" accept="image/*" id="fileIn"></label>
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>카메라로 찍기<span>지금 바로 촬영</span><input type="file" accept="image/*" capture="environment" id="camIn"></label>
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>사진 고르기<span>앨범·파일에서 선택</span><input type="file" accept="image/*" id="fileIn"></label>
       </div>
     </div>
     <div id="stepEdit" hidden>
@@ -208,8 +569,8 @@ h3{font-size:15px;margin:22px 0 4px}
       </div>
       <label class="f" for="inTitle">작품 제목</label>
       <input class="f" id="inTitle" maxlength="60" placeholder="제목이 없으면 ‘무제’로 올라가요">
-      <label class="f" for="inDesc">작품 설명 (선택)</label>
-      <textarea class="f" id="inDesc" maxlength="500" placeholder="무엇을, 왜 표현했는지 적어 보세요"></textarea>
+      <div class="dlabel"><label class="f" for="inDesc">작품 설명</label><button class="btn link" id="tplReload" hidden>템플릿 다시 넣기</button></div>
+      <textarea class="f" id="inDesc" maxlength="1000" rows="7" placeholder="무엇을, 왜 표현했는지 적어 보세요"></textarea>
       <div class="row"><button class="btn primary" id="submitBtn">작품 올리기</button></div>
       <p class="hint" id="saveName"></p>
     </div>
@@ -218,25 +579,32 @@ h3{font-size:15px;margin:22px 0 4px}
 
 <!-- 작품 보기 -->
 <div class="overlay" id="detailOv">
-  <div class="sheet wide" role="dialog" aria-label="작품 보기">
-    <button class="close" data-close aria-label="닫기">×</button>
-    <div id="detail"></div>
-  </div>
+  <div class="sheet detail" id="detail" role="dialog" aria-label="작품 보기"></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 /* ===== 설정 (여기만 바꾸면 돼요) ===== */
-const BOARD_TITLE = '우리들의 작품 게시판';
-const BOARD_SUBTITLE = '작품을 올리고, 친구 작품에 감상을 남겨요';
+const BOARD_TITLE = '배곧아트그램';                     // 로고처럼 크게 보이는 이름
+const BOARD_SUBTITLE = '';                               // 로고 아래 작은 제목 (비우면 안 보여요)
+const BOARD_DESC = '작품을 올리고, 친구 작품에 감상을 남겨요'; // 안내 문구
 const SUPABASE_URL = 'https://fikehztdtvnwesfnnyzl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpa2VoenRkdHZud2VzZm5ueXpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3NzUyNzAsImV4cCI6MjEwOTM1MTI3MH0.n5FzF4pnv0fLz6-I0_jLx2LYNE6KeKbeAMQN53UCihg';
 const BUCKET = 'board-artworks';
+const SKIN = 'pop';   // 디자인: 'pop'(팝) | 'gallery'(갤러리) | 'sketch'(스케치북) | 'feed'(인스타)
+const FONT = 'dohyeon';   // 글꼴: 'dohyeon'(도현) | 'jua'(주아) | 'hahmlet'(함렛) | 'gasoek'(가석원) | 'skin'(디자인 기본)
 /* ==================================== */
 
-document.title = BOARD_TITLE;
+document.title = BOARD_TITLE + (BOARD_SUBTITLE ? ' · ' + BOARD_SUBTITLE : '');
 document.getElementById('boardTitle').textContent = BOARD_TITLE;
-document.getElementById('boardSub').textContent = BOARD_SUBTITLE;
+document.getElementById('boardSub').textContent = BOARD_DESC;
+document.getElementById('headSub').textContent = BOARD_SUBTITLE;
+document.getElementById('loginKicker').textContent = BOARD_SUBTITLE;
+document.getElementById('headSub').hidden = document.getElementById('loginKicker').hidden = !BOARD_SUBTITLE;
+document.getElementById('loginBrand').textContent = BOARD_TITLE;
+document.getElementById('loginSub').textContent = BOARD_DESC;
+if (SKIN !== 'feed') document.documentElement.dataset.skin = SKIN;
+if (FONT !== 'skin') document.documentElement.dataset.font = FONT;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const S = { posts: [], comments: [], sig: '', me: null, pw: null, tab: '전체', open: null };
@@ -254,6 +622,25 @@ const store = {
 const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, () => (Math.random() * 16 | 0).toString(16)));
 
+const VER = '<svg class="ver" viewBox="0 0 16 16" aria-label="선생님 인증"><circle cx="8" cy="8" r="8" style="fill:var(--ver,#0095f6)"/><path d="M4.6 8.2l2.2 2.2 4.6-4.7" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CMT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.7 16.2A9 9 0 1 0 17 20l4 1z"/></svg>';
+const PAL = ['#f56040','#e1306c','#833ab4','#405de6','#f77737','#5851db','#2a9d8f','#c13584','#3a86ff','#e76f51'];
+function av(seed, text, cls = ''){
+  let h = 0; for (const ch of String(seed)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return `<span class="av ${cls}" style="background:${PAL[h % PAL.length]}" aria-hidden="true">${esc(text)}</span>`;
+}
+const tAv = (cls = '') => `<span class="av ${cls}" style="background:var(--ver,#0095f6)" aria-hidden="true">쌤</span>`;
+const short = n => String(n).slice(-2);
+function rel(t){
+  const s = (Date.now() - new Date(t)) / 1000;
+  if (s < 60) return '방금';
+  if (s < 3600) return Math.floor(s / 60) + '분 전';
+  if (s < 86400) return Math.floor(s / 3600) + '시간 전';
+  if (s < 86400 * 7) return Math.floor(s / 86400) + '일 전';
+  return fmt(t).split(' ')[0];
+}
+S.view = store.get('artboard-view') || 'feed';
+
 let toastT;
 function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200); }
 function openOv(id){ $(id).classList.add('open'); }
@@ -265,11 +652,12 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') document.que
 /* ---------- 서버 ---------- */
 async function admin(action, extra = {}){
   const { data, error } = await sb.functions.invoke('board-admin', {
-    body: { action, pw: S.pw, studentId: S.me && S.me.id, name: S.me && S.me.name, ...extra },
+    body: { action, pw: S.pw, token: S.me && S.me.token, ...extra },
   });
   if (error) {
-    let m = '요청을 처리하지 못했어요. 잠시 뒤 다시 해 주세요.';
-    try { const j = await error.context.json(); if (j.error) m = j.error; } catch(e){}
+    let m = '요청을 처리하지 못했어요. 잠시 뒤 다시 해 주세요.', code = '';
+    try { const j = await error.context.json(); if (j.error) m = j.error; code = j.code || ''; } catch(e){}
+    if (code === 'auth' && S.me) { logoutLocal(); openOv('#loginOv'); }
     throw new Error(m);
   }
   return data;
@@ -283,10 +671,12 @@ function applyData(d){
 }
 async function load(){
   try {
-    const [p, c] = await Promise.all([
+    const [p, c, cfg] = await Promise.all([
       sb.from('board_posts').select('*').order('created_at', { ascending: false }),
       sb.from('board_comments').select('*').order('created_at'),
+      sb.from('board_config').select('key,value'),
     ]);
+    if (!cfg.error && cfg.data) S.template = (cfg.data.find(r => r.key === 'post_template') || {}).value || '';
     if (p.error || c.error) throw new Error('게시판을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
     applyData({ posts: p.data, comments: c.data });
   } catch(e){ toast(errMsg(e)); }
@@ -302,21 +692,151 @@ setInterval(() => { if (!document.hidden) load(); }, 90000);
 /* ---------- 사람 ---------- */
 function renderWho(){
   const w = $('#who');
-  if (S.pw) w.innerHTML = '<span class="chip">선생님</span>';
-  else if (S.me) w.innerHTML = `<span class="chip">${esc(S.me.id)} ${esc(S.me.name)}</span><button class="btn link" id="changeMe">바꾸기</button>`;
+  if (S.pw) w.innerHTML = `<span class="me">${tAv()}</span>`;
+  else if (S.me) w.innerHTML = `<button class="me" id="changeMe" aria-label="내 계정">${av(S.me.id + S.me.name, short(S.me.name))}</button>`;
   else w.innerHTML = '';
-  const c = $('#changeMe'); if (c) c.onclick = () => { $('#inId').value = S.me.id; $('#inName').value = S.me.name; openOv('#loginOv'); };
+  const c = $('#changeMe'); if (c) c.onclick = () => { $('#meT').textContent = S.me.id + ' ' + S.me.name; openOv('#meOv'); };
   $('#teacherbar').hidden = !S.pw;
 }
-$('#loginGo').onclick = () => {
-  const id = $('#inId').value.replace(/\s/g,''), name = $('#inName').value.replace(/\s/g,'');
+function logoutLocal(){
+  S.me = null; store.del('artboard-me'); renderWho(); render();
+  $('#stepLogin').hidden = false; $('#stepNewPin').hidden = true; $('#inPin').value = '';
+}
+let pendingMe = null;
+function enterBoard(){ S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); }
+$('#loginGo').onclick = async () => {
+  const id = $('#inId').value.replace(/\s/g,''), name = $('#inName').value.replace(/\s/g,''), pin = $('#inPin').value.trim();
   if (!/^\d{4,6}$/.test(id)) return toast('학번은 숫자 4~6자리로 적어 주세요.');
   if (name.length < 2 || name.length > 10) return toast('이름을 정확히 적어 주세요.');
-  S.me = { id, name }; store.set('artboard-me', S.me);
-  S.tab = classOf(id);
-  closeOv($('#loginOv')); renderWho(); render();
+  if (!/^\d{4,6}$/.test(pin)) return toast('PIN을 입력해 주세요.');
+  const b = $('#loginGo'); b.disabled = true;
+  try {
+    const r = await admin('student_login', { studentId: id, name, pin });
+    pendingMe = { id: r.studentId, name: r.name, token: r.token };
+    $('#inPin').value = '';
+    if (r.mustChange) { $('#stepLogin').hidden = true; $('#stepNewPin').hidden = false; setTimeout(() => $('#newPin1').focus(), 50); }
+    else enterBoard();
+  } catch(e){ toast(errMsg(e)); }
+  b.disabled = false;
 };
-$('#inName').addEventListener('keydown', e => { if (e.key === 'Enter') $('#loginGo').click(); });
+['#inId', '#inName', '#inPin'].forEach(sel => $(sel).addEventListener('keydown', e => { if (e.key === 'Enter') $('#loginGo').click(); }));
+async function savePin(p1, p2, token){
+  if (!/^\d{4,6}$/.test(p1)) throw new Error('PIN은 숫자 4~6자리로 정해 주세요.');
+  if (p1 !== p2) throw new Error('두 번 입력한 PIN이 달라요.');
+  const { data, error } = await sb.functions.invoke('board-admin', { body: { action: 'set_pin', token, newPin: p1 } });
+  if (error) { let m = 'PIN을 바꾸지 못했어요.'; try { m = (await error.context.json()).error || m; } catch(e){} throw new Error(m); }
+  return data;
+}
+$('#newPinGo').onclick = async () => {
+  try { await savePin($('#newPin1').value, $('#newPin2').value, pendingMe.token); $('#newPin1').value = $('#newPin2').value = ''; enterBoard(); toast('PIN을 만들었어요. 다음부터 이 PIN으로 들어와요.'); }
+  catch(e){ toast(errMsg(e)); }
+};
+$('#mePinGo').onclick = async () => {
+  try { await savePin($('#mePin1').value, $('#mePin2').value, S.me.token); $('#mePin1').value = $('#mePin2').value = ''; closeOv($('#meOv')); toast('PIN을 바꿨어요.'); }
+  catch(e){ toast(errMsg(e)); }
+};
+$('#logoutBtn').onclick = async () => {
+  try { await admin('logout'); } catch(e){}
+  closeOv($('#meOv')); logoutLocal(); openOv('#loginOv');
+};
+
+/* ---------- 글 템플릿 (교사) ---------- */
+const TPL_EXAMPLE = '■ 작품 의도(무엇을, 왜 표현했나요?): \n\n■ 사용한 재료와 기법: \n\n■ 가장 신경 쓴 부분: \n\n■ 제작하며 느낀 점: ';
+const tplCount = () => { $('#tplCount').textContent = $('#tplIn').value.length; };
+$('#tplBtn').onclick = async () => { await load(); $('#tplIn').value = S.template || ''; tplCount(); openOv('#tplOv'); setTimeout(() => $('#tplIn').focus(), 50); };
+$('#tplIn').oninput = tplCount;
+$('#tplExample').onclick = () => {
+  if ($('#tplIn').value.trim() && !confirm('지금 내용을 예시로 바꿀까요?')) return;
+  $('#tplIn').value = TPL_EXAMPLE; tplCount();
+};
+$('#tplSave').onclick = async () => {
+  const b = $('#tplSave'); b.disabled = true;
+  try { await admin('set_template', { template: $('#tplIn').value }); S.template = $('#tplIn').value.replace(/\r\n/g, '\n'); closeOv($('#tplOv')); toast(S.template.trim() ? '템플릿을 저장했어요. 학생 글쓰기 칸에 바로 적용돼요.' : '템플릿을 비웠어요.'); }
+  catch(e){ toast(errMsg(e)); }
+  b.disabled = false;
+};
+
+/* ---------- 학생 명단 (교사) ---------- */
+let roster = [];
+function parseRoster(text){
+  return text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => {
+    const m = l.match(/(\d{4,6})[\s,\t]+([^\s,\t].*)$/);
+    return m ? { studentId: m[1], name: m[2].replace(/[\s,\t].*$/, '') } : { studentId: l, name: '' };
+  });
+}
+async function loadRoster(){
+  try { roster = (await admin('roster_list')).students; renderRoster(); } catch(e){ toast(errMsg(e)); }
+}
+function renderRoster(){
+  const classes = [...new Set(roster.map(r => classOf(r.student_id)))].sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
+  const sel = $('#rosterClass'), cur = sel.value || (S.tab !== '전체' ? S.tab : '전체');
+  sel.innerHTML = ['전체', ...classes].map(c => `<option value="${esc(c)}">${c === '전체' ? '전체 (' + roster.length + '명)' : esc(c) + '반'}</option>`).join('');
+  sel.value = ['전체', ...classes].includes(cur) ? cur : '전체';
+  const list = roster.filter(r => sel.value === '전체' || classOf(r.student_id) === sel.value);
+  if (!list.length) { $('#rosterList').innerHTML = '<p class="hint" style="padding:14px">아직 명단이 없어요. 위에 학번과 이름을 붙여 넣어 주세요.</p>'; return; }
+  $('#rosterList').innerHTML = `<table><thead><tr><th>학번</th><th>이름</th><th>PIN 상태</th><th></th></tr></thead><tbody>${list.map(r => {
+    const locked = r.locked_until && new Date(r.locked_until) > new Date();
+    const st = r.init_pin ? `${r.must_change ? '초기 PIN' : '선생님 코드'} <span class="pinbadge">${esc(r.init_pin)}</span>` : '<span class="ok">학생이 바꿈</span>';
+    return `<tr><td>${esc(r.student_id)}</td><td>${esc(r.name)}</td><td>${st}${locked ? ' · 잠김' : ''}</td>
+      <td class="act"><button data-reset="${esc(r.student_id)}">PIN 초기화</button><button class="del" data-rdel="${esc(r.student_id)}">삭제</button></td></tr>`;
+  }).join('')}</tbody></table>`;
+  $('#rosterList').querySelectorAll('[data-reset]').forEach(b => b.onclick = async () => {
+    if (!confirm(b.dataset.reset + ' 학생의 PIN을 새 초기 PIN으로 바꿀까요?')) return;
+    try { const r = await admin('reset_pin', { studentId: b.dataset.reset }); toast('새 초기 PIN: ' + r.pin); loadRoster(); } catch(e){ toast(errMsg(e)); }
+  });
+  $('#rosterList').querySelectorAll('[data-rdel]').forEach(b => b.onclick = async () => {
+    if (!confirm(b.dataset.rdel + ' 학생을 명단에서 지울까요? 올린 작품은 그대로 남아요.')) return;
+    try { await admin('roster_delete', { studentId: b.dataset.rdel }); loadRoster(); } catch(e){ toast(errMsg(e)); }
+  });
+}
+$('#rosterBtn').onclick = () => { openOv('#rosterOv'); loadRoster(); };
+$('#rosterClass').onchange = renderRoster;
+$('#rosterAdd').onclick = async () => {
+  const rows = parseRoster($('#rosterIn').value);
+  if (!rows.length) return toast('학번과 이름을 붙여 넣어 주세요.');
+  const b = $('#rosterAdd'); b.disabled = true;
+  try {
+    const r = await admin('roster_import', { rows });
+    $('#rosterIn').value = r.invalid.join('\n');
+    toast(`${r.added.length}명 추가` + (r.skipped ? `, ${r.skipped}명은 이미 있어요` : '') + (r.invalid.length ? `, ${r.invalid.length}줄은 형식이 맞지 않아요` : ''));
+    await loadRoster();
+  } catch(e){ toast(errMsg(e)); }
+  b.disabled = false;
+};
+const rosterView = () => roster.filter(r => $('#rosterClass').value === '전체' || classOf(r.student_id) === $('#rosterClass').value);
+function loadQrLib(){
+  if (window.qrcode) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+    sc.onload = res; sc.onerror = () => rej(new Error('QR 코드를 만들지 못했어요. 인터넷 연결을 확인해 주세요.'));
+    document.head.appendChild(sc);
+  });
+}
+function qrSvg(text){
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+}
+$('#rosterPrint').onclick = async () => {
+  const list = rosterView().filter(r => r.init_pin);
+  if (!list.length) return toast('인쇄할 코드가 없어요. 모두 자기 PIN으로 바꿨어요.');
+  try { await loadQrLib(); } catch(e){ return toast(errMsg(e)); }
+  const base = location.origin + location.pathname;
+  const slip = r => `<div class="slip"><div class="st">
+      <div class="brand">${esc(BOARD_TITLE)}${BOARD_SUBTITLE ? ' · ' + esc(BOARD_SUBTITLE) : ''}</div>
+      <div class="who">${esc(r.student_id)} ${esc(r.name)}</div>
+      <div class="lbl">PIN</div><div class="pin">${esc(r.init_pin)}</div>
+      <div class="how">${r.must_change ? '처음 들어가면 나만 아는 PIN으로 바꿔요.' : '학번·이름·PIN이 모두 맞아야 들어가요.'}<br>${esc(base)}</div>
+    </div><div class="qr">${qrSvg(base + '?s=' + r.student_id)}휴대폰 카메라로 찍기</div></div>`;
+  const pages = [];
+  for (let i = 0; i < list.length; i += 10) pages.push(`<div class="ppage">${list.slice(i, i + 10).map(slip).join('')}</div>`);
+  $('#printArea').innerHTML = pages.join('');
+  setTimeout(() => window.print(), 50);
+};
+$('#rosterCopy').onclick = async () => {
+  const text = '학번\t이름\t초기 PIN\n' + rosterView().map(r => `${r.student_id}\t${r.name}\t${r.init_pin || '(학생이 바꿈)'}`).join('\n');
+  try { await navigator.clipboard.writeText(text); toast('복사했어요. 엑셀이나 한글에 붙여 넣으세요.'); } catch(e){ toast('복사하지 못했어요.'); }
+};
 $('#toTeacher').onclick = () => { closeOv($('#loginOv')); openOv('#teacherOv'); setTimeout(() => $('#inPw').focus(), 50); };
 $('#teacherGo').onclick = async () => {
   const pw = $('#inPw').value;
@@ -369,30 +889,64 @@ $('#zipBtn').onclick = async () => {
 };
 
 /* ---------- 게시판 ---------- */
+['feed', 'grid'].forEach(v => $(v === 'feed' ? '#vFeed' : '#vGrid').onclick = () => { S.view = v; store.set('artboard-view', v); render(); });
+function openPost(id){ S.open = id; renderDetail(); openOv('#detailOv'); }
+const TILE = ['#FF5C39','#FFE45C','#7B61FF','#2EC4B6','#FF9F1C','#E2DCFA'];
+function renderMosaic(){
+  const ps = S.posts.slice(0, 14);
+  const one = ps.length >= 4
+    ? ps.map(p => `<img src="${pub(p.thumb_path)}" alt="" loading="lazy">`).join('')
+    : TILE.map((c, i) => `<i style="background:${c};aspect-ratio:${[3/4, 1, 4/5, 2/3, 1, 5/4][i]}"></i>`).join('').repeat(2);
+  $('#mosaic').innerHTML = one + one;
+}
 function render(){
+  renderMosaic();
   const classes = [...new Set(S.posts.map(p => classOf(p.student_id)))];
   const myClass = S.me ? classOf(S.me.id) : null;
   if (myClass && !classes.includes(myClass)) classes.push(myClass);
   classes.sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
   if (S.tab !== '전체' && !classes.includes(S.tab)) S.tab = '전체';
-  $('#tabs').innerHTML = ['전체', ...classes].map(t => `<button class="tab" aria-pressed="${t === S.tab}" data-tab="${esc(t)}">${t === '전체' ? '전체' : esc(t) + '반'}</button>`).join('');
-  $('#tabs').querySelectorAll('.tab').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
+  $('#tabs').innerHTML = ['전체', ...classes].map(t => `<button class="story" aria-pressed="${t === S.tab}" data-tab="${esc(t)}">
+      <span class="ring"><span>${t === '전체' ? 'ALL' : esc(t)}</span></span>${t === '전체' ? '전체' : esc(t) + '반'}</button>`).join('');
+  $('#tabs').querySelectorAll('.story').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
+  $('#vFeed').setAttribute('aria-pressed', S.view === 'feed');
+  $('#vGrid').setAttribute('aria-pressed', S.view === 'grid');
 
+  const wall = $('#wall');
   const list = S.posts.filter(p => S.tab === '전체' || classOf(p.student_id) === S.tab);
   if (!list.length) {
-    $('#wall').innerHTML = `<div class="empty"><p>아직 걸린 작품이 없어요</p><p>오른쪽 아래 ‘작품 올리기’로 첫 작품을 걸어 주세요.</p></div>`;
+    wall.className = '';
+    wall.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      <p class="big">아직 올라온 작품이 없어요</p><p>위쪽 ‘올리기’로 첫 작품을 올려 보세요.</p></div>`;
     return;
   }
-  $('#wall').innerHTML = list.map(p => {
-    const cs = S.comments.filter(c => c.post_id === p.id);
-    const fb = cs.some(c => c.role === 'teacher');
-    return `<button class="work" data-post="${p.id}">
-      <div class="frame"><img src="${pub(p.thumb_path)}" alt="${esc(p.title)}" loading="lazy"></div>
-      <div class="label"><div class="t">${esc(p.title)}</div><div class="a">${esc(p.student_id)} ${esc(p.name)}</div>
-      <div class="meta"><span>${ICON} ${cs.length}</span>${fb ? '<span class="fb">선생님 피드백</span>' : ''}</div></div>
-    </button>`;
-  }).join('');
-  $('#wall').querySelectorAll('.work').forEach(b => b.onclick = () => { S.open = b.dataset.post; renderDetail(); openOv('#detailOv'); });
+  const byPost = id => S.comments.filter(c => c.post_id === id);
+  if (S.view === 'grid') {
+    wall.className = 'grid';
+    wall.innerHTML = list.map(p => {
+      const cs = byPost(p.id), fb = cs.some(c => c.role === 'teacher');
+      return `<button class="g" data-post="${p.id}" aria-label="${esc(p.title)}, ${esc(p.name)}">
+        <img src="${pub(p.thumb_path)}" alt="" loading="lazy">
+        ${fb ? `<span class="fbmark">${VER}</span>` : ''}
+        <span class="ov">${CMT} ${cs.length}</span></button>`;
+    }).join('');
+  } else {
+    wall.className = 'feed';
+    wall.innerHTML = list.map(p => {
+      const cs = byPost(p.id), fb = cs.filter(c => c.role === 'teacher');
+      const shown = [...fb.slice(-1), ...cs.filter(c => c.role !== 'teacher').slice(fb.length ? -1 : -2)];
+      return `<article class="post">
+        <div class="ph">${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반</small></div></div>
+        <button class="pimg" data-post="${p.id}" aria-label="${esc(p.title)} 크게 보기"><img src="${pub(p.thumb_path)}" alt="${esc(p.title)}" loading="lazy"></button>
+        <div class="pact"><button data-post="${p.id}" aria-label="댓글 보기">${CMT}${cs.length || ''}</button>${fb.length ? `<span class="tag">${VER} 선생님 피드백</span>` : ''}</div>
+        <p class="pcap"><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? `<span class="d">${esc(p.description)}</span>` : ''}</p>
+        ${shown.map(c => `<p class="prev"><b>${c.role === 'teacher' ? '선생님' + VER : esc(c.name)}</b>${esc(c.body)}</p>`).join('')}
+        ${cs.length > shown.length ? `<button class="more" data-post="${p.id}">댓글 ${cs.length}개 모두 보기</button>` : ''}
+        <div class="when">${rel(p.created_at)}</div>
+      </article>`;
+    }).join('');
+  }
+  wall.querySelectorAll('[data-post]').forEach(b => b.onclick = () => openPost(b.dataset.post));
 }
 
 /* ---------- 작품 보기 + 댓글 ---------- */
@@ -400,30 +954,39 @@ function renderDetail(keepDraft){
   const p = S.posts.find(x => x.id === S.open);
   if (!p) { closeOv($('#detailOv')); return; }
   const draft = keepDraft && $('#cText') ? $('#cText').value : '';
+  const keepScroll = keepDraft && $('#dscroll') ? $('#dscroll').scrollTop : 0;
   const cs = S.comments.filter(c => c.post_id === p.id);
   const mine = S.me && S.me.id === p.student_id && S.me.name === p.name;
   const acts = [];
   if (S.pw) acts.push(`<button class="btn" id="dlPost">원본 내려받기</button>`);
   if (S.pw || mine) acts.push(`<button class="btn danger" id="delPost">작품 지우기</button>`);
-  $('#detail').innerHTML = `<div class="dgrid">
+  const pAv = av(p.student_id + p.name, short(p.name), 'sm');
+  $('#detail').innerHTML = `
+    <button class="close" id="dClose" aria-label="닫기">×</button>
     <div class="dimg"><img src="${pub(p.image_path)}" alt="${esc(p.title)}"></div>
-    <div>
-      <h2>${esc(p.title)}</h2>
-      <div class="hint">${esc(p.student_id)} ${esc(p.name)} 　${fmt(p.created_at)}</div>
-      ${p.description ? `<p class="desc">${esc(p.description)}</p>` : ''}
-      ${acts.length ? `<div class="acts">${acts.join('')}</div>` : ''}
-      <h3>${S.pw ? '피드백과 감상' : '감상 댓글'} ${cs.length}</h3>
-      <div>${cs.length ? cs.map(c => {
-          const own = c.role === 'student' && S.me && c.student_id === S.me.id && c.name === S.me.name;
-          return `<div class="c ${c.role === 'teacher' ? 'teacher' : ''}">
-          <div class="h"><b>${c.role === 'teacher' ? '선생님 피드백' : esc(c.student_id + ' ' + c.name)}</b><time>${fmt(c.created_at)}</time>
-          ${(S.pw || own) ? `<button data-del="${c.id}">지우기</button>` : ''}</div>
-          <p>${esc(c.body)}</p></div>`; }).join('') : '<p class="hint">첫 감상을 남겨 주세요. 무엇이 눈에 띄었는지, 어떤 느낌이 들었는지 적어 보세요.</p>'}</div>
-      <label class="f" for="cText">${S.pw ? '피드백 쓰기' : '감상 쓰기'}</label>
-      <textarea class="f" id="cText" maxlength="500"></textarea>
-      <div class="row"><button class="btn primary" id="cSend">${S.pw ? '피드백 남기기' : '댓글 달기'}</button></div>
-    </div></div>`;
-  $('#cText').value = draft;
+    <div class="dside">
+      <div class="ph">${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반</small></div></div>
+      <div class="dscroll" id="dscroll">
+        <div class="cm">${pAv}<div><p><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? esc(p.description) : ''}</p><small>${rel(p.created_at)}</small></div></div>
+        ${acts.length ? `<div class="acts">${acts.join('')}</div>` : ''}
+        ${cs.length ? cs.map(c => {
+          const t = c.role === 'teacher';
+          const own = !t && S.me && c.student_id === S.me.id && c.name === S.me.name;
+          return `<div class="cm ${t ? 'teacher' : ''}">${t ? tAv('sm') : av(c.student_id + c.name, short(c.name), 'sm')}
+            <div><div class="bub"><p><b>${t ? '선생님' + VER : esc(c.student_id + ' ' + c.name)}</b>${esc(c.body)}</p></div>
+            <small><span>${rel(c.created_at)}</span>${(S.pw || own) ? `<button data-del="${c.id}">지우기</button>` : ''}</small></div></div>`;
+        }).join('') : `<div class="nocm"><strong>아직 댓글이 없어요</strong>무엇이 눈에 띄었는지, 어떤 느낌이 드는지 남겨 보세요.</div>`}
+      </div>
+      <div class="dfoot"><div class="cform">${S.pw ? tAv('sm') : S.me ? av(S.me.id + S.me.name, short(S.me.name), 'sm') : ''}
+        <textarea id="cText" rows="1" maxlength="500" aria-label="${S.pw ? '피드백 쓰기' : '감상 쓰기'}" placeholder="${S.pw ? '피드백 남기기…' : '감상 남기기…'}"></textarea>
+        <button id="cSend">게시</button></div></div>
+    </div>`;
+  const ta = $('#cText');
+  ta.value = draft;
+  const grow = () => { ta.style.height = '38px'; ta.style.height = Math.max(38, Math.min(ta.scrollHeight, 110)) + 'px'; };
+  ta.oninput = grow; grow();
+  $('#dscroll').scrollTop = keepScroll;
+  $('#dClose').onclick = () => closeOv($('#detailOv'));
   $('#cSend').onclick = sendComment;
   const dp = $('#delPost'); if (dp) dp.onclick = delPost;
   const dl = $('#dlPost'); if (dl) dl.onclick = async () => { try { saveBlob(await fetchBlob(p.image_path), p.file_name); } catch(e){ toast(errMsg(e)); } };
@@ -437,10 +1000,9 @@ async function sendComment(){
   try {
     if (S.pw) await admin('teacher_comment', { postId: S.open, body });
     else {
-      const { error } = await sb.from('board_comments').insert({ post_id: S.open, role: 'student', student_id: S.me.id, name: S.me.name, body });
-      if (error) throw new Error('댓글을 달지 못했어요. 작품이 지워졌을 수 있어요.');
+      await admin('student_comment', { postId: S.open, body });
     }
-    $('#cText').value = ''; await load(); toast(S.pw ? '피드백을 남겼어요.' : '댓글을 달았어요.');
+    $('#cText').value = ''; await load(); { const d = $('#dscroll'); if (d) d.scrollTop = d.scrollHeight; } toast(S.pw ? '피드백을 남겼어요.' : '댓글을 달았어요.');
   } catch(e){ toast(errMsg(e)); }
   if ($('#cSend')) $('#cSend').disabled = false;
 }
@@ -461,7 +1023,14 @@ const pv = $('#preview');
 $('#fab').onclick = () => {
   if (!S.me && !S.pw) return openOv('#loginOv');
   if (!S.me) return toast('교사 모드에서는 작품을 올릴 수 없어요. 학생 학번으로 들어와 주세요.');
+  if (!$('#inDesc').value.trim() && S.template) $('#inDesc').value = S.template;
+  $('#tplReload').hidden = !S.template;
   showStep('pick'); openOv('#upOv');
+};
+$('#tplReload').onclick = () => {
+  const cur = $('#inDesc').value.trim();
+  if (cur && cur !== S.template.trim() && !confirm('지금 쓴 설명을 지우고 템플릿을 다시 넣을까요?')) return;
+  $('#inDesc').value = S.template; $('#inDesc').focus();
 };
 function showStep(s){ $('#stepPick').hidden = s !== 'pick'; $('#stepEdit').hidden = s !== 'edit'; }
 ['#camIn', '#fileIn'].forEach(sel => $(sel).onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadFile(f); });
@@ -587,22 +1156,21 @@ const toBlob = (c, q) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : re
 $('#submitBtn').onclick = async () => {
   if (!E.rot90) return toast('사진을 먼저 골라 주세요.');
   if (E.cropping) return toast('자르기를 적용하거나 취소해 주세요.');
+  if (S.template && $('#inDesc').value.trim() === S.template.trim()) { $('#inDesc').focus(); return toast('작품 설명 템플릿의 빈칸을 채워 주세요.'); }
   const b = $('#submitBtn'); b.disabled = true; b.textContent = '올리는 중…';
   try {
-    const base = `${S.me.id}/${uuid()}`;
     const full = await toBlob(renderOut(2000, true), 0.88);
     const thumb = await toBlob(renderOut(700, true), 0.82);
-    for (const [path, blob] of [[base + '.jpg', full], [base + '_t.jpg', thumb]]) {
-      const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+    const u = await admin('upload_urls');
+    for (const [slot, blob] of [[u.full, full], [u.thumb, thumb]]) {
+      const { error } = await sb.storage.from(BUCKET).uploadToSignedUrl(slot.path, slot.token, blob, { contentType: 'image/jpeg' });
       if (error) throw new Error('사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요.');
     }
-    const { error } = await sb.from('board_posts').insert({
-      student_id: S.me.id, name: S.me.name,
+    await admin('create_post', {
       title: $('#inTitle').value.trim().slice(0, 60) || '무제',
-      description: $('#inDesc').value.trim().slice(0, 500),
-      image_path: base + '.jpg', thumb_path: base + '_t.jpg',
+      description: $('#inDesc').value.trim().slice(0, 1000),
+      image_path: u.full.path, thumb_path: u.thumb.path,
     });
-    if (error) throw new Error('작품 정보를 저장하지 못했어요. 다시 올려 주세요.');
     $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null;
     closeOv($('#upOv')); S.tab = classOf(S.me.id); await load(); toast('작품을 올렸어요.');
   } catch(e){ toast(errMsg(e)); }
@@ -611,9 +1179,16 @@ $('#submitBtn').onclick = async () => {
 
 /* ---------- 시작 ---------- */
 S.me = store.get('artboard-me');
+const qsId = new URLSearchParams(location.search).get('s');
+if (S.me && !S.me.token) { S.me = null; store.del('artboard-me'); }
 S.pw = store.get('artboard-pw', true);
 if (S.me && S.me.id) S.tab = classOf(S.me.id);
 renderWho();
+if (qsId && /^\d{4,6}$/.test(qsId)) {
+  if (S.me && S.me.id !== qsId) { const old = S.me; logoutLocal(); admin('logout', { token: old.token }).catch(() => {}); }
+  if (!S.me) { $('#inId').value = qsId; setTimeout(() => $('#inName').focus(), 300); }
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch(e){}
+}
 if (!S.me && !S.pw) openOv('#loginOv');
 load();
 </script>
