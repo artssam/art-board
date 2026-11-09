@@ -145,9 +145,15 @@ textarea.f{resize:vertical;min-height:72px}
 .sl{display:grid;grid-template-columns:52px 1fr 32px;align-items:center;gap:8px;font-size:13px;font-weight:600}
 .sl input{width:100%;accent-color:var(--blue)}
 .sl output{text-align:right;color:var(--muted);font-weight:400}
-.cropbar{display:none;background:var(--soft);padding:8px 10px;border-radius:10px;margin-top:10px;font-size:13px;align-items:center;gap:8px;flex-wrap:wrap}
-.cropbar.on{display:flex}
-.cropbar span{margin-right:auto}
+.modebar{display:none;background:var(--soft);padding:10px;border-radius:10px;margin-top:10px;font-size:13px}
+.modebar.on{display:block}
+.modebar .mtxt{margin:0 0 8px}
+.modebar .mrow{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+.ratios{display:flex;gap:6px;flex-wrap:wrap}
+.ratios .btn{padding:6px 11px;font-size:13px;border-radius:999px;background:var(--card)}
+.ratios .btn[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+.sl.rot{grid-template-columns:52px 26px 1fr 26px 40px;grid-column:1/-1}
+.sl .step{width:26px;height:26px;border-radius:50%;background:var(--soft);font-weight:800;font-size:16px;line-height:1}
 #upOv .sheet h2{margin-bottom:0}
 
 /* 작품 상세 */
@@ -549,20 +555,40 @@ textarea.f{resize:vertical;min-height:72px}
     </div>
     <div id="stepEdit" hidden>
       <div class="stage"><canvas id="preview" aria-label="보정 미리보기"></canvas></div>
-      <div class="cropbar" id="cropbar">
-        <span>사진 위를 끌어서 남길 부분을 고르세요.</span>
-        <button class="btn" id="cropCancel">취소</button>
-        <button class="btn primary" id="cropApply">자르기 적용</button>
+      <div class="modebar" id="cropbar">
+        <p class="mtxt">모서리나 변의 손잡이를 끌어 크기를 바꾸고, 안쪽을 끌어 옮겨요.</p>
+        <div class="ratios" role="group" aria-label="자르기 비율">
+          <button class="btn" data-ratio="free" aria-pressed="true">자유</button>
+          <button class="btn" data-ratio="orig" aria-pressed="false">원본</button>
+          <button class="btn" data-ratio="1" aria-pressed="false">정사각형</button>
+          <button class="btn" data-ratio="0.75" aria-pressed="false">세로 3:4</button>
+          <button class="btn" data-ratio="1.3333" aria-pressed="false">가로 4:3</button>
+        </div>
+        <div class="mrow">
+          <button class="btn" id="cropReset">전체 선택</button>
+          <button class="btn" id="cropCancel">취소</button>
+          <button class="btn primary" id="cropApply">자르기 적용</button>
+        </div>
+      </div>
+      <div class="modebar" id="flatbar">
+        <p class="mtxt">동그라미 4개를 작품의 네 귀퉁이에 맞추면, 비스듬히 찍힌 작품을 정면에서 찍은 것처럼 반듯하게 펴 줘요.</p>
+        <div class="mrow">
+          <button class="btn" id="flatOff" hidden>펴기 해제</button>
+          <button class="btn" id="flatCancel">취소</button>
+          <button class="btn primary" id="flatApply">펴기 적용</button>
+        </div>
       </div>
       <div class="tools" id="tools">
         <button class="btn" id="rotL">왼쪽으로 돌리기</button>
         <button class="btn" id="rotR">오른쪽으로 돌리기</button>
-        <button class="btn" id="cropBtn">자르기</button>
+        <button class="btn" id="flatBtn" aria-pressed="false">비스듬한 사진 펴기</button>
+        <button class="btn" id="cropBtn" aria-pressed="false">자르기</button>
         <button class="btn" id="autoBtn" aria-pressed="false">자동 보정</button>
         <button class="btn" id="resetBtn">처음 사진으로</button>
         <button class="btn link" id="repick">다른 사진 고르기</button>
       </div>
-      <div class="sliders">
+      <div class="sliders" id="sliders">
+        <div class="sl rot"><label for="sA">기울기</label><button class="step" id="aMinus" aria-label="기울기 0.5도 왼쪽">−</button><input type="range" id="sA" min="-45" max="45" step="0.5" value="0"><button class="step" id="aPlus" aria-label="기울기 0.5도 오른쪽">+</button><output id="oA">0°</output></div>
         <div class="sl"><label for="sB">밝기</label><input type="range" id="sB" min="-50" max="50" value="0"><output id="oB">0</output></div>
         <div class="sl"><label for="sC">대비</label><input type="range" id="sC" min="-50" max="50" value="0"><output id="oC">0</output></div>
         <div class="sl"><label for="sS">채도</label><input type="range" id="sS" min="-50" max="50" value="0"><output id="oS">0</output></div>
@@ -1030,7 +1056,7 @@ async function delPost(){
 }
 
 /* ---------- 사진 촬영·보정 ---------- */
-const E = { base: null, rot90: null, rot: 0, crop: null, sel: null, cropping: false, drag: null, auto: null, adj: { b: 0, c: 0, s: 0, t: 0 } };
+const E = { base: null, rot90: null, flat: null, geom: null, rot: 0, angle: 0, pts: null, fp: null, crop: null, sel: null, ratio: 'free', mode: null, drag: null, grid: false, auto: null, adj: { b: 0, c: 0, s: 0, t: 0 } };
 const pv = $('#preview');
 
 $('#fab').onclick = () => {
@@ -1063,28 +1089,57 @@ function loadFile(file){
   img.onerror = () => { URL.revokeObjectURL(url); toast('이 사진 형식은 열 수 없어요. JPG나 PNG 사진으로 골라 주세요.'); };
   img.src = url;
 }
+/* 사진 처리 순서: 원본 → 90도 돌리기(rot90) → 비스듬한 사진 펴기(flat) → 세밀한 기울기(geom) → 자르기(crop) → 색 보정 */
 function resetEdits(){
-  E.rot = 0; E.auto = null; E.adj = { b: 0, c: 0, s: 0, t: 0 }; endCrop();
-  rebuildRot(); syncUI(); draw();
+  E.rot = 0; E.auto = null; E.adj = { b: 0, c: 0, s: 0, t: 0 };
+  endMode(); rebuildRot(); syncUI(); draw();
 }
 function rebuildRot(){
   const s = E.base, w = s.width, h = s.height, c = document.createElement('canvas'), q = E.rot % 180 !== 0;
   c.width = q ? h : w; c.height = q ? w : h;
   const x = c.getContext('2d'); x.translate(c.width / 2, c.height / 2); x.rotate(E.rot * Math.PI / 180); x.drawImage(s, -w / 2, -h / 2);
-  E.rot90 = c; E.crop = null;
+  E.rot90 = c; E.flat = null; E.pts = null; E.angle = 0; E.crop = null;
+  rebuildGeom();
 }
+function rebuildGeom(){
+  const R = E.flat || E.rot90;
+  if (!E.angle) { E.geom = R; return; }
+  const w = R.width, h = R.height, t = Math.abs(E.angle) * Math.PI / 180, cs = Math.cos(t), sn = Math.sin(t);
+  // 돌린 뒤 빈 모서리가 생기지 않도록, 같은 비율로 꽉 차게 확대해요.
+  const k = Math.min(w / (w * cs + h * sn), h / (w * sn + h * cs));
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+  x.translate(c.width / 2, c.height / 2); x.rotate(E.angle * Math.PI / 180); x.drawImage(R, -w / 2, -h / 2);
+  E.geom = c;
+}
+const fmtA = a => (a > 0 ? '+' : '') + a + '°';
 function syncUI(){
   [['b','B'],['c','C'],['s','S'],['t','T']].forEach(([k, K]) => { $('#s' + K).value = E.adj[k]; $('#o' + K).textContent = E.adj[k]; });
+  $('#sA').value = E.angle; $('#oA').textContent = fmtA(E.angle);
   $('#autoBtn').setAttribute('aria-pressed', !!E.auto);
+  $('#cropBtn').setAttribute('aria-pressed', !!E.crop);
+  $('#flatBtn').setAttribute('aria-pressed', !!E.flat);
 }
 [['b','B'],['c','C'],['s','S'],['t','T']].forEach(([k, K]) => $('#s' + K).addEventListener('input', e => { E.adj[k] = +e.target.value; $('#o' + K).textContent = e.target.value; draw(); }));
-$('#rotL').onclick = () => { E.rot = (E.rot + 270) % 360; endCrop(); rebuildRot(); draw(); };
-$('#rotR').onclick = () => { E.rot = (E.rot + 90) % 360; endCrop(); rebuildRot(); draw(); };
+$('#rotL').onclick = () => { E.rot = (E.rot + 270) % 360; endMode(); rebuildRot(); syncUI(); draw(); };
+$('#rotR').onclick = () => { E.rot = (E.rot + 90) % 360; endMode(); rebuildRot(); syncUI(); draw(); };
 $('#resetBtn').onclick = resetEdits;
 $('#autoBtn').onclick = () => { E.auto = E.auto ? null : computeAuto(); syncUI(); draw(); };
 
+/* 세밀한 기울기: 돌리는 동안 수평·수직을 맞추기 쉽게 격자를 보여 줘요 */
+let gridT;
+function setAngle(a){
+  E.angle = Math.max(-45, Math.min(45, Math.round(a * 2) / 2));
+  rebuildGeom(); syncUI();
+  E.grid = true; clearTimeout(gridT); gridT = setTimeout(() => { E.grid = false; draw(); }, 1200);
+  draw();
+}
+$('#sA').addEventListener('input', e => setAngle(+e.target.value));
+$('#aMinus').onclick = () => setAngle(E.angle - 0.5);
+$('#aPlus').onclick = () => setAngle(E.angle + 0.5);
+
 function computeAuto(){
-  const R = E.rot90, k = Math.min(1, 400 / Math.max(R.width, R.height));
+  const R = E.geom, k = Math.min(1, 400 / Math.max(R.width, R.height));
   const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(R.width * k)); c.height = Math.max(1, Math.round(R.height * k));
   const x = c.getContext('2d'); x.drawImage(R, 0, 0, c.width, c.height);
   const px = x.getImageData(0, 0, c.width, c.height).data, n = px.length / 4;
@@ -1110,12 +1165,12 @@ function lut(ch){
   return L;
 }
 const edited = () => E.auto || E.adj.b || E.adj.c || E.adj.s || E.adj.t;
-function renderOut(maxDim, useCrop){
-  const R = E.rot90, cr = (useCrop && E.crop) || { x: 0, y: 0, w: 1, h: 1 };
+function renderOut(maxDim, useCrop, R = E.geom){
+  const cr = (useCrop && E.crop) || { x: 0, y: 0, w: 1, h: 1 };
   const sx = cr.x * R.width, sy = cr.y * R.height, sw = cr.w * R.width, sh = cr.h * R.height;
   const k = Math.min(1, maxDim / Math.max(sw, sh));
   const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(sw * k)); c.height = Math.max(1, Math.round(sh * k));
-  const x = c.getContext('2d'); x.drawImage(R, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(R, sx, sy, sw, sh, 0, 0, c.width, c.height);
   if (edited()) {
     const d = x.getImageData(0, 0, c.width, c.height), px = d.data;
     const L0 = lut(0), L1 = lut(1), L2 = lut(2), s = 1 + E.adj.s / 100;
@@ -1128,47 +1183,275 @@ function renderOut(maxDim, useCrop){
   }
   return c;
 }
+
+/* 미리보기 그리기 (자르기 틀, 펴기 점, 격자) */
 let raf = 0;
 function draw(){
   if (!E.rot90) return;
   cancelAnimationFrame(raf);
   raf = requestAnimationFrame(() => {
-    const out = renderOut(1000, !E.cropping);
+    const out = renderOut(1000, !E.mode, E.mode === 'flat' ? E.rot90 : E.geom);
     pv.width = out.width; pv.height = out.height;
     const x = pv.getContext('2d'); x.drawImage(out, 0, 0);
-    if (E.cropping && E.sel) {
-      const s = E.sel, W = pv.width, H = pv.height;
-      x.save(); x.fillStyle = 'rgba(0,0,0,.55)'; x.beginPath(); x.rect(0, 0, W, H); x.rect(s.x * W, s.y * H, s.w * W, s.h * H); x.fill('evenodd');
-      x.strokeStyle = '#fff'; x.lineWidth = Math.max(2, W / 300); x.strokeRect(s.x * W, s.y * H, s.w * W, s.h * H); x.restore();
-    }
+    const W = pv.width, H = pv.height, rw = pv.getBoundingClientRect().width, u = rw ? W / rw : 1; // 화면 1px = 캔버스 u px
+    x.save();
+    if (E.grid && !E.mode) drawGrid(x, 0, 0, W, H, u, 8, 'rgba(255,255,255,.55)');
+    if (E.mode === 'crop') drawCrop(x, W, H, u);
+    if (E.mode === 'flat') drawFlat(x, W, H, u, out);
+    x.restore();
   });
 }
+function drawGrid(x, X, Y, w, h, u, n, color){
+  x.strokeStyle = color; x.lineWidth = u; x.beginPath();
+  for (let i = 1; i < n; i++) { x.moveTo(X + w * i / n, Y); x.lineTo(X + w * i / n, Y + h); x.moveTo(X, Y + h * i / n); x.lineTo(X + w, Y + h * i / n); }
+  x.stroke();
+}
+function drawCrop(x, W, H, u){
+  const s = E.sel, X = s.x * W, Y = s.y * H, w = s.w * W, h = s.h * H;
+  x.fillStyle = 'rgba(0,0,0,.55)'; x.beginPath(); x.rect(0, 0, W, H); x.rect(X, Y, w, h); x.fill('evenodd');
+  drawGrid(x, X, Y, w, h, u, 3, 'rgba(255,255,255,.5)');
+  x.strokeStyle = '#fff'; x.lineWidth = 2 * u; x.strokeRect(X, Y, w, h);
+  const L = Math.min(20 * u, w / 2, h / 2), T = 4 * u;
+  x.lineWidth = T; x.lineCap = 'square'; x.beginPath();
+  [[X, Y, 1, 1], [X + w, Y, -1, 1], [X + w, Y + h, -1, -1], [X, Y + h, 1, -1]].forEach(([cx, cy, dx, dy]) => {
+    x.moveTo(cx + dx * L, cy + dy * T / 2); x.lineTo(cx + dx * T / 2, cy + dy * T / 2); x.lineTo(cx + dx * T / 2, cy + dy * L);
+  });
+  if (!ratioPx()) {
+    const m = Math.min(12 * u, w / 4, h / 4);
+    x.moveTo(X + w / 2 - m, Y + T / 2); x.lineTo(X + w / 2 + m, Y + T / 2);
+    x.moveTo(X + w / 2 - m, Y + h - T / 2); x.lineTo(X + w / 2 + m, Y + h - T / 2);
+    x.moveTo(X + T / 2, Y + h / 2 - m); x.lineTo(X + T / 2, Y + h / 2 + m);
+    x.moveTo(X + w - T / 2, Y + h / 2 - m); x.lineTo(X + w - T / 2, Y + h / 2 + m);
+  }
+  x.stroke();
+}
+function drawFlat(x, W, H, u, img){
+  const P = E.fp.map(p => [p.x * W, p.y * H]);
+  const quad = () => { x.beginPath(); P.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath(); };
+  x.fillStyle = 'rgba(0,0,0,.5)'; x.beginPath(); x.rect(0, 0, W, H);
+  P.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.closePath(); x.fill('evenodd');
+  quad(); x.strokeStyle = 'rgba(0,0,0,.5)'; x.lineWidth = 4 * u; x.stroke();
+  quad(); x.strokeStyle = '#fff'; x.lineWidth = 2 * u; x.stroke();
+  P.forEach(([a, b], i) => {
+    const on = E.drag && E.drag.kind === i;
+    x.beginPath(); x.arc(a, b, (on ? 15 : 12) * u, 0, Math.PI * 2);
+    x.fillStyle = on ? 'rgba(255,92,57,.45)' : 'rgba(255,255,255,.3)'; x.fill();
+    x.lineWidth = 2.5 * u; x.strokeStyle = '#fff'; x.stroke();
+    x.beginPath(); x.arc(a, b, 2 * u, 0, Math.PI * 2); x.fillStyle = '#fff'; x.fill();
+  });
+  // 손가락에 가려도 귀퉁이를 정확히 맞출 수 있게 돋보기를 보여 줘요.
+  if (E.drag && typeof E.drag.kind === 'number') {
+    const [a, b] = P[E.drag.kind], R = Math.min(W, H) * 0.18, Z = 2.5, gap = 10 * u;
+    const cx = a < W / 2 ? W - R - gap : R + gap, cy = R + gap, r = R / Z;
+    x.save(); x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.clip();
+    x.fillStyle = '#111'; x.fillRect(cx - R, cy - R, 2 * R, 2 * R);
+    x.drawImage(img, a - r, b - r, 2 * r, 2 * r, cx - R, cy - R, 2 * R, 2 * R);
+    x.restore();
+    x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.lineWidth = 3 * u; x.strokeStyle = '#fff'; x.stroke();
+    x.beginPath(); x.moveTo(cx - 10 * u, cy); x.lineTo(cx + 10 * u, cy); x.moveTo(cx, cy - 10 * u); x.lineTo(cx, cy + 10 * u);
+    x.lineWidth = 1.5 * u; x.strokeStyle = '#ff5c39'; x.stroke();
+  }
+}
 
-/* 자르기 */
+/* 모드 (자르기 / 펴기) */
+function setMode(m){
+  E.mode = m; E.drag = null; pv.style.cursor = '';
+  $('#cropbar').classList.toggle('on', m === 'crop');
+  $('#flatbar').classList.toggle('on', m === 'flat');
+  $('#tools').hidden = $('#sliders').hidden = !!m;
+}
+function endMode(){ setMode(null); }
 const clamp = v => Math.max(0, Math.min(1, v));
-function pt(e){ const r = pv.getBoundingClientRect(); return { x: clamp((e.clientX - r.left) / r.width), y: clamp((e.clientY - r.top) / r.height) }; }
-function endCrop(){ E.cropping = false; E.sel = null; E.drag = null; $('#cropbar').classList.remove('on'); $('#tools').hidden = false; }
+const within = (v, max) => Math.max(0, Math.min(max, v));
+function pt(e){ const r = pv.getBoundingClientRect(); return { x: clamp((e.clientX - r.left) / r.width), y: clamp((e.clientY - r.top) / r.height), rw: r.width, rh: r.height }; }
+
+/* 자르기: 손잡이 틀 + 비율 */
+function ratioPx(){ // 가로÷세로(픽셀). 자유면 null
+  if (E.ratio === 'free') return null;
+  if (E.ratio === 'orig') return E.geom.width / E.geom.height;
+  return +E.ratio;
+}
+function fitRatio(){
+  const r = ratioPx(); if (!r) return;
+  const W = E.geom.width, H = E.geom.height, s = E.sel;
+  let wp = W, hp = W / r; if (hp > H) { hp = H; wp = H * r; }
+  const w = wp / W, h = hp / H, cx = s.x + s.w / 2, cy = s.y + s.h / 2;
+  E.sel = { w, h, x: within(cx - w / 2, 1 - w), y: within(cy - h / 2, 1 - h) };
+}
+function syncRatio(){ document.querySelectorAll('[data-ratio]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ratio === E.ratio)); }
+document.querySelectorAll('[data-ratio]').forEach(b => b.onclick = () => { E.ratio = b.dataset.ratio; syncRatio(); fitRatio(); draw(); });
 $('#cropBtn').onclick = () => {
-  E.cropping = true; E.sel = E.crop ? { ...E.crop } : { x: .05, y: .05, w: .9, h: .9 };
-  $('#cropbar').classList.add('on'); $('#tools').hidden = true; draw();
+  E.sel = E.crop ? { ...E.crop } : { x: 0, y: 0, w: 1, h: 1 };
+  syncRatio(); if (!E.crop) fitRatio(); setMode('crop'); draw();
 };
-$('#cropCancel').onclick = () => { endCrop(); draw(); };
+$('#cropReset').onclick = () => { E.sel = { x: 0, y: 0, w: 1, h: 1 }; fitRatio(); draw(); };
+$('#cropCancel').onclick = () => { endMode(); draw(); };
 $('#cropApply').onclick = () => {
-  if (E.sel && E.sel.w > .04 && E.sel.h > .04) E.crop = { ...E.sel }; else return toast('남길 부분을 조금 더 크게 골라 주세요.');
-  endCrop(); draw();
+  const s = E.sel;
+  if (s.w < .04 || s.h < .04) return toast('남길 부분을 조금 더 크게 골라 주세요.');
+  E.crop = (s.x < .001 && s.y < .001 && s.w > .998 && s.h > .998) ? null : { ...s };
+  endMode(); syncUI(); draw();
 };
-pv.addEventListener('pointerdown', e => { if (!E.cropping) return; pv.setPointerCapture(e.pointerId); E.drag = pt(e); E.sel = { ...E.drag, w: 0, h: 0 }; draw(); });
-pv.addEventListener('pointermove', e => {
-  if (!E.drag) return; const p = pt(e), a = E.drag;
-  E.sel = { x: Math.min(p.x, a.x), y: Math.min(p.y, a.y), w: Math.abs(p.x - a.x), h: Math.abs(p.y - a.y) }; draw();
+function hitCrop(p){
+  const s = E.sel, tx = 26 / p.rw, ty = 26 / p.rh;
+  const corners = { tl: [s.x, s.y], tr: [s.x + s.w, s.y], br: [s.x + s.w, s.y + s.h], bl: [s.x, s.y + s.h] };
+  let best = null, bd = Infinity;
+  for (const k in corners) {
+    const dx = Math.abs(p.x - corners[k][0]) / tx, dy = Math.abs(p.y - corners[k][1]) / ty;
+    if (dx < 1 && dy < 1 && dx + dy < bd) { best = k; bd = dx + dy; }
+  }
+  if (best) return best;
+  const inX = p.x > s.x && p.x < s.x + s.w, inY = p.y > s.y && p.y < s.y + s.h;
+  if (!ratioPx()) {
+    if (inX && Math.abs(p.y - s.y) < ty) return 't';
+    if (inX && Math.abs(p.y - s.y - s.h) < ty) return 'b';
+    if (inY && Math.abs(p.x - s.x) < tx) return 'l';
+    if (inY && Math.abs(p.x - s.x - s.w) < tx) return 'r';
+  }
+  return inX && inY ? 'move' : null;
+}
+function dragCrop(p){
+  const d = E.drag, s0 = d.s, MIN = 0.05, W = E.geom.width, H = E.geom.height, r = ratioPx();
+  let s = { ...s0 };
+  if (d.kind === 'move') {
+    s.x = within(s0.x + p.x - d.p.x, 1 - s0.w); s.y = within(s0.y + p.y - d.p.y, 1 - s0.h);
+  } else if (d.kind.length === 2) { // 모서리: 반대쪽 모서리를 고정해요
+    const top = d.kind[0] === 't', left = d.kind[1] === 'l';
+    const ax = left ? s0.x + s0.w : s0.x, ay = top ? s0.y + s0.h : s0.y;
+    const maxW = left ? ax : 1 - ax, maxH = top ? ay : 1 - ay;
+    let w = Math.min(Math.max(left ? ax - p.x : p.x - ax, MIN), maxW), h = Math.min(Math.max(top ? ay - p.y : p.y - ay, MIN), maxH);
+    if (r) {
+      let wp = w * W, hp = h * H;
+      if (wp / hp > r) hp = wp / r; else wp = hp * r;
+      const k = Math.min(1, maxW * W / wp, maxH * H / hp);
+      w = wp * k / W; h = hp * k / H;
+    }
+    s = { x: left ? ax - w : ax, y: top ? ay - h : ay, w, h };
+  } else { // 변
+    if (d.kind === 't') { const b = s0.y + s0.h; s.y = Math.min(p.y, b - MIN); s.h = b - s.y; }
+    if (d.kind === 'b') s.h = Math.max(MIN, p.y - s0.y);
+    if (d.kind === 'l') { const rr = s0.x + s0.w; s.x = Math.min(p.x, rr - MIN); s.w = rr - s.x; }
+    if (d.kind === 'r') s.w = Math.max(MIN, p.x - s0.x);
+  }
+  E.sel = s;
+}
+
+/* 비스듬한 사진 펴기: 네 귀퉁이 → 반듯한 직사각형 (원근 보정) */
+$('#flatBtn').onclick = () => {
+  E.fp = E.pts ? E.pts.map(p => ({ ...p })) : [{ x: .08, y: .08 }, { x: .92, y: .08 }, { x: .92, y: .92 }, { x: .08, y: .92 }];
+  $('#flatOff').hidden = !E.flat; setMode('flat'); draw();
+};
+$('#flatCancel').onclick = () => { endMode(); draw(); };
+$('#flatOff').onclick = () => { E.flat = null; E.pts = null; E.crop = null; rebuildGeom(); endMode(); syncUI(); draw(); toast('펴기를 해제했어요.'); };
+function orderPts(pts){ // 엇갈리게 옮겨도 왼쪽 위 → 오른쪽 위 → 오른쪽 아래 → 왼쪽 아래 순서로 정리
+  const cx = pts.reduce((a, p) => a + p.x, 0) / 4, cy = pts.reduce((a, p) => a + p.y, 0) / 4;
+  const s = [...pts].sort((a, b) => Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx));
+  const i = s.reduce((bi, p, j) => (p.x + p.y < s[bi].x + s[bi].y ? j : bi), 0);
+  return s.slice(i).concat(s.slice(0, i));
+}
+function convex(P){
+  let sign = 0;
+  for (let i = 0; i < 4; i++) {
+    const a = P[i], b = P[(i + 1) % 4], c = P[(i + 2) % 4];
+    const z = (b.x - a.x) * (c.y - b.y) - (b.y - a.y) * (c.x - b.x);
+    if (Math.abs(z) < 1e-6) return false;
+    if (sign && Math.sign(z) !== sign) return false;
+    sign = Math.sign(z);
+  }
+  return true;
+}
+$('#flatApply').onclick = () => {
+  const P = orderPts(E.fp), W = E.rot90.width, H = E.rot90.height;
+  if (!convex(P.map(p => ({ x: p.x * W, y: p.y * H })))) return toast('네 동그라미가 서로 엇갈리지 않게 작품 귀퉁이에 맞춰 주세요.');
+  const b = $('#flatApply'); b.disabled = true; b.textContent = '펴는 중…';
+  setTimeout(() => {
+    try {
+      E.pts = P; E.flat = warp(E.rot90, P); E.angle = 0; E.crop = null; rebuildGeom();
+      endMode(); syncUI(); draw(); toast('반듯하게 폈어요. 필요하면 기울기와 자르기로 다듬어 보세요.');
+    } catch(e){ toast('사진을 펴지 못했어요. 동그라미 위치를 바꿔 다시 해 주세요.'); }
+    b.disabled = false; b.textContent = '펴기 적용';
+  }, 30);
+};
+function homography(src, dst){ // (u,v) → (x,y) 를 옮기는 3×3 행렬 (마지막 값 1)
+  const A = [], B = [];
+  for (let i = 0; i < 4; i++) {
+    const [u, v] = src[i], [x, y] = dst[i];
+    A.push([u, v, 1, 0, 0, 0, -u * x, -v * x]); B.push(x);
+    A.push([0, 0, 0, u, v, 1, -u * y, -v * y]); B.push(y);
+  }
+  for (let c = 0; c < 8; c++) {
+    let p = c; for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]]; [B[c], B[p]] = [B[p], B[c]];
+    if (Math.abs(A[c][c]) < 1e-12) throw new Error('singular');
+    for (let r = 0; r < 8; r++) if (r !== c) {
+      const f = A[r][c] / A[c][c];
+      for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
+      B[r] -= f * B[c];
+    }
+  }
+  return B.map((b, i) => b / A[i][i]);
+}
+function warp(src, pts){
+  const W = src.width, H = src.height, P = pts.map(p => [p.x * W, p.y * H]);
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  let ow = Math.max(d(P[0], P[1]), d(P[3], P[2])), oh = Math.max(d(P[0], P[3]), d(P[1], P[2]));
+  const k = Math.min(1, 2000 / Math.max(ow, oh));
+  ow = Math.max(1, Math.round(ow * k)); oh = Math.max(1, Math.round(oh * k));
+  const M = homography([[0, 0], [ow, 0], [ow, oh], [0, oh]], P);
+  const s = src.getContext('2d').getImageData(0, 0, W, H).data;
+  const out = document.createElement('canvas'); out.width = ow; out.height = oh;
+  const ox = out.getContext('2d'), od = ox.createImageData(ow, oh), o = od.data;
+  const W1 = W - 1, H1 = H - 1;
+  for (let v = 0, j = 0; v < oh; v++) {
+    const vv = v + .5;
+    for (let uu = .5; uu < ow; uu++, j += 4) {
+      const z = M[6] * uu + M[7] * vv + 1;
+      let x = (M[0] * uu + M[1] * vv + M[2]) / z - .5, y = (M[3] * uu + M[4] * vv + M[5]) / z - .5;
+      if (x < 0) x = 0; else if (x > W1) x = W1;
+      if (y < 0) y = 0; else if (y > H1) y = H1;
+      const x0 = x | 0, y0 = y | 0, x1 = x0 < W1 ? x0 + 1 : x0, y1 = y0 < H1 ? y0 + 1 : y0, fx = x - x0, fy = y - y0;
+      const a = (y0 * W + x0) * 4, b = (y0 * W + x1) * 4, c = (y1 * W + x0) * 4, e = (y1 * W + x1) * 4;
+      const w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+      o[j] = s[a] * w00 + s[b] * w10 + s[c] * w01 + s[e] * w11;
+      o[j + 1] = s[a + 1] * w00 + s[b + 1] * w10 + s[c + 1] * w01 + s[e + 1] * w11;
+      o[j + 2] = s[a + 2] * w00 + s[b + 2] * w10 + s[c + 2] * w01 + s[e + 2] * w11;
+      o[j + 3] = 255;
+    }
+  }
+  ox.putImageData(od, 0, 0);
+  return out;
+}
+function hitFlat(p){
+  const tx = 34 / p.rw, ty = 34 / p.rh;
+  let best = null, bd = Infinity;
+  E.fp.forEach((q, i) => { const dd = Math.hypot((p.x - q.x) / tx, (p.y - q.y) / ty); if (dd < 1 && dd < bd) { best = i; bd = dd; } });
+  return best;
+}
+
+/* 손가락·마우스로 끌기 */
+const CURSOR = { tl: 'nwse-resize', br: 'nwse-resize', tr: 'nesw-resize', bl: 'nesw-resize', t: 'ns-resize', b: 'ns-resize', l: 'ew-resize', r: 'ew-resize', move: 'move' };
+pv.addEventListener('pointerdown', e => {
+  if (!E.mode) return;
+  const p = pt(e), kind = E.mode === 'crop' ? hitCrop(p) : hitFlat(p);
+  if (kind === null) return;
+  e.preventDefault(); pv.setPointerCapture(e.pointerId);
+  E.drag = { kind, p, s: E.mode === 'crop' ? { ...E.sel } : null };
+  draw();
 });
-['pointerup', 'pointercancel'].forEach(t => pv.addEventListener(t, () => { E.drag = null; }));
+pv.addEventListener('pointermove', e => {
+  if (!E.mode) return;
+  const p = pt(e);
+  if (!E.drag) { const k = E.mode === 'crop' ? hitCrop(p) : hitFlat(p); pv.style.cursor = k === null ? '' : E.mode === 'flat' ? 'grab' : CURSOR[k]; return; }
+  if (E.mode === 'crop') dragCrop(p); else E.fp[E.drag.kind] = { x: p.x, y: p.y };
+  draw();
+});
+['pointerup', 'pointercancel'].forEach(t => pv.addEventListener(t, () => { if (E.drag) { E.drag = null; draw(); } }));
 
 /* 올리기 */
 const toBlob = (c, q) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('사진을 만들지 못했어요.')), 'image/jpeg', q));
 $('#submitBtn').onclick = async () => {
   if (!E.rot90) return toast('사진을 먼저 골라 주세요.');
-  if (E.cropping) return toast('자르기를 적용하거나 취소해 주세요.');
+  if (E.mode) return toast(E.mode === 'crop' ? '자르기를 적용하거나 취소해 주세요.' : '펴기를 적용하거나 취소해 주세요.');
   if (S.template && $('#inDesc').value.trim() === S.template.trim()) { $('#inDesc').focus(); return toast('작품 설명 템플릿의 빈칸을 채워 주세요.'); }
   const b = $('#submitBtn'); b.disabled = true; b.textContent = '올리는 중…';
   try {
