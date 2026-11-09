@@ -45,6 +45,17 @@ async function me(token: unknown) {
   // deno-lint-ignore no-explicit-any
   return { sid: data.student_id as string, name: (data as any).board_students?.name as string };
 }
+async function checkUpload(sid: string, image: unknown, thumb: unknown) {
+  const m = /^(\d{4,6})\/([0-9a-f-]{36})\.jpg$/.exec(String(image ?? ""));
+  if (!m || m[1] !== sid || thumb !== `${sid}/${m[2]}_t.jpg`) throw new Fail("사진 정보가 올바르지 않아요.");
+  const { data: files } = await db.storage.from(BUCKET).list(sid, { search: m[2] });
+  if (!files || files.length < 2) throw new Fail("사진이 다 올라가지 않았어요. 다시 올려 주세요.");
+}
+async function config(key: string) {
+  const { data } = await db.from("board_config").select("value").eq("key", key).maybeSingle();
+  return data?.value ?? "";
+}
+const FLAGS = ["cross_class_view", "shared_device"];
 function checkPin(pin: string) {
   if (!/^\d{4,6}$/.test(pin)) throw new Fail("PIN은 숫자 4~6자리로 정해 주세요.");
 }
@@ -81,6 +92,7 @@ Deno.serve(async (req) => {
           comments: comments.filter((c) => ids.has(c.post_id)),
           template: cfg("post_template"),
           crossClass,
+          sharedDevice: cfg("shared_device") === "1",
           // 로그인 첫 화면 배경: 다른 반 보기가 켜져 있을 때만 작품 썸네일을 보여 줘요.
           mosaic: crossClass ? posts.slice(0, 14).map((p) => p.thumb_path) : [],
         });
@@ -101,9 +113,10 @@ Deno.serve(async (req) => {
         await db.from("board_students").update({ fail_count: 0, locked_until: null }).eq("student_id", sid);
         await db.from("board_sessions").delete().lt("expires_at", new Date().toISOString());
         const token = randHex(32);
+        const keep = (await config("shared_device")) === "1" ? 12 * 3600e3 : 60 * 86400e3;
         await db.from("board_sessions").insert({
           token_hash: await sha256(token), student_id: sid,
-          expires_at: new Date(Date.now() + 60 * 86400e3).toISOString(),
+          expires_at: new Date(Date.now() + keep).toISOString(),
         });
         return json({ token, studentId: sid, name: st.name, mustChange: !!st.must_change });
       }
@@ -132,10 +145,7 @@ Deno.serve(async (req) => {
       }
       case "create_post": {
         const u = await me(b.token);
-        const m = /^(\d{4,6})\/([0-9a-f-]{36})\.jpg$/.exec(String(b.image_path ?? ""));
-        if (!m || m[1] !== u.sid || b.thumb_path !== `${u.sid}/${m[2]}_t.jpg`) throw new Fail("사진 정보가 올바르지 않아요.");
-        const { data: files } = await db.storage.from(BUCKET).list(u.sid, { search: m[2] });
-        if (!files || files.length < 2) throw new Fail("사진이 다 올라가지 않았어요. 다시 올려 주세요.");
+        await checkUpload(u.sid, b.image_path, b.thumb_path);
         const { error } = await db.from("board_posts").insert({
           student_id: u.sid, name: u.name,
           title: String(b.title ?? "").trim().slice(0, 60) || "무제",
@@ -143,6 +153,29 @@ Deno.serve(async (req) => {
           image_path: b.image_path, thumb_path: b.thumb_path,
         });
         if (error) throw new Fail("작품 정보를 저장하지 못했어요.");
+        return json({ ok: true });
+      }
+
+      case "update_post": {
+        // 내 작품의 제목·설명을 고치고, 원하면 사진도 바꿔요. 받은 댓글·피드백은 그대로 남아요.
+        const u = await me(b.token);
+        const { data: p } = await db.from("board_posts").select("*").eq("id", b.postId).maybeSingle();
+        if (!p) throw new Fail("지워진 작품이에요.");
+        if (p.student_id !== u.sid) throw new Fail("내 작품만 고칠 수 있어요.");
+        const patch: Record<string, unknown> = {
+          title: String(b.title ?? "").trim().slice(0, 60) || "무제",
+          description: String(b.description ?? "").trim().slice(0, 1000),
+          edited_at: new Date().toISOString(),
+        };
+        let old: string[] = [];
+        if (b.image_path) {
+          await checkUpload(u.sid, b.image_path, b.thumb_path);
+          patch.image_path = b.image_path; patch.thumb_path = b.thumb_path;
+          old = [p.image_path, p.thumb_path];
+        }
+        const { error } = await db.from("board_posts").update(patch).eq("id", p.id);
+        if (error) throw new Fail("작품을 고치지 못했어요.");
+        if (old.length) await db.storage.from(BUCKET).remove(old);
         return json({ ok: true });
       }
 
@@ -196,6 +229,13 @@ Deno.serve(async (req) => {
       case "set_cross_class": {
         needTeacher();
         const { error } = await db.from("board_config").upsert({ key: "cross_class_view", value: b.on ? "1" : "0", updated_at: new Date().toISOString() });
+        if (error) throw new Fail("설정을 바꾸지 못했어요.");
+        return json({ ok: true });
+      }
+      case "set_flag": {
+        needTeacher();
+        if (!FLAGS.includes(b.key)) throw new Fail("알 수 없는 설정이에요.");
+        const { error } = await db.from("board_config").upsert({ key: b.key, value: b.on ? "1" : "0", updated_at: new Date().toISOString() });
         if (error) throw new Fail("설정을 바꾸지 못했어요.");
         return json({ ok: true });
       }

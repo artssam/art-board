@@ -42,6 +42,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .newbtn{white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;border-radius:999px;background:var(--text);color:var(--bg);font-weight:700;font-size:14px}
 .newbtn svg{width:18px;height:18px}
 .who{display:flex;align-items:center}
+#changeMe{padding:6px;margin:-6px}
 .me{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;font-weight:700;color:#fff;letter-spacing:-.05em}
 .av.sm{width:28px;height:28px;font-size:10px}
@@ -80,7 +81,7 @@ main{max-width:935px;margin:0 auto;padding:6px 0 90px}
 .pimg{display:block;width:100%;background:var(--soft)}
 .pimg img{display:block;width:100%;height:auto;max-height:620px;object-fit:contain}
 .pact{display:flex;align-items:center;gap:14px;padding:10px 12px 6px}
-.pact button{display:flex;align-items:center;gap:6px;font-weight:700}
+.pact button{display:flex;align-items:center;gap:6px;font-weight:700;padding:10px;margin:-10px;min-height:44px}
 .pact svg{width:24px;height:24px}
 .tag{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--blue-ink);background:var(--tbg);padding:3px 9px;border-radius:999px}
 .pcap{padding:0 12px;margin:0}
@@ -89,7 +90,7 @@ main{max-width:935px;margin:0 auto;padding:6px 0 90px}
 .pcap .d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;margin-top:2px}
 .prev{padding:0 12px;margin:4px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .prev b{font-weight:700;margin-right:6px}
-.more{color:var(--muted);padding:6px 12px 0;font-size:14px;display:block}
+.more{color:var(--muted);padding:0 12px;min-height:44px;font-size:14px;display:flex;align-items:center}
 .when{color:var(--muted);font-size:11px;letter-spacing:.02em;padding:6px 12px 0}
 
 /* 격자 */
@@ -121,7 +122,7 @@ main{max-width:935px;margin:0 auto;padding:6px 0 90px}
 .sheet.wide{max-width:720px}
 .sheet h2{font-size:17px;font-weight:700;margin:0 0 4px;text-align:center}
 .brandbig{font-weight:800;font-size:26px;letter-spacing:-.04em;text-align:center;margin:4px 0 16px}
-.close{position:absolute;top:6px;right:6px;font-size:28px;line-height:1;padding:6px 12px;color:var(--text);z-index:2}
+.close{position:absolute;top:4px;right:4px;font-size:28px;line-height:1;min-width:44px;min-height:44px;color:var(--text);z-index:2}
 label.f{display:block;font-size:13px;font-weight:700;margin:14px 0 5px}
 input.f,textarea.f{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:var(--soft);font-size:16px}
 textarea.f{resize:vertical;min-height:72px}
@@ -139,21 +140,21 @@ textarea.f{resize:vertical;min-height:72px}
 .editor .stage{background:#111;border-radius:10px;display:flex;justify-content:center;align-items:center;padding:8px;margin-top:14px}
 #preview{max-width:100%;max-height:50vh;display:block;touch-action:none}
 .tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.tools .btn{padding:7px 11px;font-size:13px;border-radius:999px}
+.tools .btn{padding:10px 12px;font-size:13px;border-radius:999px}
 .tools .btn[aria-pressed="true"]{background:var(--text);color:var(--bg)}
-.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2px 18px;margin-top:10px}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 18px;margin-top:10px}
 .sl{display:grid;grid-template-columns:52px 1fr 32px;align-items:center;gap:8px;font-size:13px;font-weight:600}
-.sl input{width:100%;accent-color:var(--blue)}
+.sl input{width:100%;height:36px;margin:0;accent-color:var(--blue)}
 .sl output{text-align:right;color:var(--muted);font-weight:400}
 .modebar{display:none;background:var(--soft);padding:10px;border-radius:10px;margin-top:10px;font-size:13px}
 .modebar.on{display:block}
 .modebar .mtxt{margin:0 0 8px}
 .modebar .mrow{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
 .ratios{display:flex;gap:6px;flex-wrap:wrap}
-.ratios .btn{padding:6px 11px;font-size:13px;border-radius:999px;background:var(--card)}
+.ratios .btn{padding:10px 12px;font-size:13px;border-radius:999px;background:var(--card)}
 .ratios .btn[aria-pressed="true"]{background:var(--text);color:var(--bg)}
-.sl.rot{grid-template-columns:52px 26px 1fr 26px 40px;grid-column:1/-1}
-.sl .step{width:26px;height:26px;border-radius:50%;background:var(--soft);font-weight:800;font-size:16px;line-height:1}
+.sl.rot{grid-template-columns:52px 40px 1fr 40px 44px;grid-column:1/-1}
+.sl .step{width:40px;height:40px;border-radius:50%;background:var(--soft);font-weight:800;font-size:18px;line-height:1}
 #upOv .sheet h2{margin-bottom:0}
 
 /* 작품 상세 */
@@ -172,14 +173,14 @@ textarea.f{resize:vertical;min-height:72px}
 .cm b{font-weight:700;margin-right:6px}
 .cm .ttl{font-family:var(--font-ttl,inherit);font-weight:700;display:block;font-size:15px;margin:2px 0}
 .cm small{color:var(--muted);font-size:12px;display:flex;gap:12px;margin-top:5px}
-.cm small button{color:var(--muted);font-size:12px;font-weight:700}
+.cm small button{color:var(--muted);font-size:12px;font-weight:700;padding:10px 6px;margin:-10px -6px}
 .cm.teacher .bub{background:var(--tbg);border-radius:14px;padding:9px 12px}
 .nocm{text-align:center;color:var(--muted);padding:24px 8px}
 .nocm strong{display:block;color:var(--text);font-size:18px;margin-bottom:4px}
 .dfoot{border-top:1px solid var(--line);padding:8px 14px;background:var(--card)}
 .cform{display:flex;align-items:center;gap:10px}
 .cform textarea{flex:1;border:0;background:none;resize:none;height:38px;min-height:38px;max-height:110px;padding:9px 0;overflow-y:auto;font-size:15px;outline:none;line-height:1.4}
-.cform button{color:var(--blue);font-weight:800;padding:6px 2px}
+.cform button{color:var(--blue);font-weight:800;padding:6px 4px;min-height:44px;min-width:44px}
 .cform button:disabled{opacity:.4}
 @media (max-width:760px){
   #detailOv{padding:0}
@@ -193,6 +194,35 @@ textarea.f{resize:vertical;min-height:72px}
 
 .toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:600;z-index:50;display:none;max-width:90vw;text-align:center}
 .toast.on{display:block}
+.toast .tact{margin-left:12px;color:inherit;font-weight:800;text-decoration:underline;padding:8px 4px}
+
+/* 작품 올리기: 올리기 버튼을 화면 아래에 고정 */
+.upfoot{position:sticky;bottom:-16px;z-index:3;margin:18px -22px -22px;padding:12px 22px calc(12px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);border-bottom-left-radius:inherit;border-bottom-right-radius:inherit}
+.upfoot .btn{width:100%;padding:14px 16px;font-size:15px}
+.editnote{background:var(--tbg);color:var(--blue-ink);border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0 0}
+
+/* 로그인한 학생 표시 + 로그아웃 */
+.sub b{color:var(--text)}
+.sub .out{color:var(--blue);font-weight:700;padding:10px 4px;margin:-10px 0}
+
+/* 설정 스위치 */
+.setrow{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.setrow > div{flex:1;min-width:0}
+.setrow .hint{text-align:left}
+.tgl{flex:none;width:52px;height:32px;border-radius:999px;background:var(--muted);position:relative;transition:background .15s}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.tgl[aria-checked="true"]{background:var(--blue)}
+.tgl[aria-checked="true"]::after{transform:translateX(20px)}
+
+/* 제출 현황 */
+.subsum{display:flex;gap:10px;margin:14px 0 4px}
+.subsum div{flex:1;background:var(--soft);border-radius:12px;padding:12px;text-align:center}
+.subsum b{display:block;font-size:28px;line-height:1.1}
+.subsum .no b{color:var(--danger)}
+.subh{display:flex;align-items:center;justify-content:space-between;margin:16px 0 6px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{background:var(--soft);border-radius:999px;padding:5px 10px;font-size:13px}
+.chips .cnt{color:var(--muted);margin-left:4px}
 @media (prefers-reduced-motion:no-preference){.overlay.open > .sheet{animation:pop .16s ease-out}@keyframes pop{from{transform:scale(.97);opacity:0}}}
 
 /* ===================== 로그인 첫 화면 ===================== */
@@ -216,16 +246,25 @@ textarea.f{resize:vertical;min-height:72px}
 .lform .fine{font-size:12px;color:var(--muted);margin:18px 0 0}
 @media (max-width:760px){
   .lwrap{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .mosaic{min-height:0;height:34vh}
+  .mosaic{min-height:0;height:min(18vh,150px);transition:height .2s}
+  #loginOv.typing .mosaic{height:0}
   .mtrack{columns:4;column-gap:6px;padding:6px}
   .mtrack img,.mtrack i{margin-bottom:6px}
   .mosaic::after{background:linear-gradient(180deg,transparent 50%,var(--bg))}
   .lform{padding-top:8px}
 }
+@media (max-width:760px) and (max-height:740px){
+  .lform{padding-top:4px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+  .lform .brandbig{font-size:30px;margin-bottom:4px}
+  .lform .lsub{margin-bottom:10px;font-size:14px}
+  .lform label.f{margin-top:10px}
+  .lform .row{margin-top:14px}
+  .lform .fine{margin-top:12px}
+}
 
 /* 글 템플릿 */
 .dlabel{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
-.dlabel .btn.link{font-size:13px;padding:4px 2px}
+.dlabel .btn.link{font-size:13px;padding:4px 6px;min-height:44px}
 
 /* PIN·명단 */
 .lstep{font-weight:800;font-size:18px;margin:0}
@@ -416,9 +455,9 @@ textarea.f{resize:vertical;min-height:72px}
     <strong><svg class="ver" viewBox="0 0 16 16" aria-label="선생님 인증"><circle cx="8" cy="8" r="8" style="fill:var(--ver,#0095f6)"/><path d="M4.6 8.2l2.2 2.2 4.6-4.7" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> 교사 모드</strong>
     <button class="btn" id="tplBtn">글 템플릿</button>
     <button class="btn" id="rosterBtn">학생 명단·PIN</button>
-    <button class="btn" id="ccBtn" aria-pressed="false">다른 반 보기: 꺼짐</button>
+    <button class="btn" id="subBtn">제출 현황</button>
     <button class="btn" id="zipBtn">이 반 사진 모두 내려받기</button>
-    <button class="btn" id="pwBtn">비밀번호 바꾸기</button>
+    <button class="btn" id="setBtn">설정</button>
     <button class="btn" id="teacherOut">나가기</button>
   </div>
 </div>
@@ -530,6 +569,40 @@ textarea.f{resize:vertical;min-height:72px}
   </div>
 </div>
 
+<!-- 게시판 설정 (교사) -->
+<div class="overlay" id="setOv">
+  <div class="sheet" role="dialog" aria-labelledby="setT" style="max-width:460px">
+    <button class="close" data-close aria-label="닫기">×</button>
+    <h2 id="setT">게시판 설정</h2>
+    <div class="setrow"><div><b>다른 반 작품 보기</b><p class="hint">켜면 학생들이 다른 반 작품도 볼 수 있어요. 댓글은 자기 반 작품에만 달 수 있어요.</p></div><button class="tgl" id="ccTgl" role="switch" aria-checked="false" aria-label="다른 반 작품 보기"></button></div>
+    <div class="setrow"><div><b>공용 기기 모드</b><p class="hint">교실 태블릿처럼 한 기기를 여럿이 돌려 쓸 때 켜요. 10분 동안 아무것도 안 하면 자동으로 로그아웃되고, 작품을 올린 뒤 로그아웃을 권해요.</p></div><button class="tgl" id="sdTgl" role="switch" aria-checked="false" aria-label="공용 기기 모드"></button></div>
+    <div class="row"><button class="btn" id="pwBtn" style="flex:1">교사 비밀번호 바꾸기</button></div>
+  </div>
+</div>
+
+<!-- 제출 현황 (교사) -->
+<div class="overlay" id="subOv">
+  <div class="sheet wide" role="dialog" aria-labelledby="subT" style="max-width:640px">
+    <button class="close" data-close aria-label="닫기">×</button>
+    <h2 id="subT">제출 현황</h2>
+    <div class="rbar" style="border-top:0;padding-top:0;margin-top:14px">
+      <select id="subClass" aria-label="반 고르기"></select>
+      <select id="subPeriod" aria-label="기간" style="margin-right:0"><option value="all">전체 기간</option><option value="today">오늘</option><option value="week">최근 7일</option></select>
+    </div>
+    <div id="subBody"><p class="hint">불러오는 중…</p></div>
+  </div>
+</div>
+
+<!-- 올린 뒤 (공용 기기) -->
+<div class="overlay" id="doneOv">
+  <div class="sheet" role="dialog" aria-labelledby="doneT">
+    <h2 id="doneT">작품을 올렸어요!</h2>
+    <p class="hint" style="text-align:center" id="doneWho"></p>
+    <div class="row"><button class="btn primary" id="doneOut">로그아웃하고 다음 친구에게 넘기기</button></div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="doneStay" style="flex:1">계속 둘러보기</button></div>
+  </div>
+</div>
+
 <!-- 비밀번호 바꾸기 -->
 <div class="overlay" id="pwOv">
   <div class="sheet" role="dialog" aria-labelledby="pwT">
@@ -552,8 +625,10 @@ textarea.f{resize:vertical;min-height:72px}
         <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>카메라로 찍기<span>지금 바로 촬영</span><input type="file" accept="image/*" capture="environment" id="camIn"></label>
         <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>사진 고르기<span>앨범·파일에서 선택</span><input type="file" accept="image/*" id="fileIn"></label>
       </div>
+      <div class="row" id="pickBackRow" hidden><button class="btn link" id="pickBack">← 고르던 사진으로 돌아가기</button></div>
     </div>
     <div id="stepEdit" hidden>
+      <p class="editnote" id="editNote" hidden>사진은 그대로 두고 제목·설명만 고칠 수 있어요. 사진을 바꾸려면 아래 보정 도구를 쓰거나 ‘다른 사진 고르기’를 누르세요. 받은 댓글과 피드백은 그대로 남아요.</p>
       <div class="stage"><canvas id="preview" aria-label="보정 미리보기"></canvas></div>
       <div class="modebar" id="cropbar">
         <p class="mtxt">모서리나 변의 손잡이를 끌어 크기를 바꾸고, 안쪽을 끌어 옮겨요.</p>
@@ -598,7 +673,7 @@ textarea.f{resize:vertical;min-height:72px}
       <input class="f" id="inTitle" maxlength="60" placeholder="제목이 없으면 ‘무제’로 올라가요">
       <div class="dlabel"><label class="f" for="inDesc">작품 설명</label><button class="btn link" id="tplReload" hidden>템플릿 다시 넣기</button></div>
       <textarea class="f" id="inDesc" maxlength="1000" rows="7" placeholder="무엇을, 왜 표현했는지 적어 보세요"></textarea>
-      <div class="row"><button class="btn primary" id="submitBtn">작품 올리기</button></div>
+      <div class="upfoot" id="upFoot"><button class="btn primary" id="submitBtn">작품 올리기</button></div>
     </div>
   </div>
 </div>
@@ -668,7 +743,11 @@ function rel(t){
 S.view = store.get('artboard-view') || 'feed';
 
 let toastT;
-function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3200); }
+function toast(m, act){
+  const t = $('#toast'); t.textContent = m;
+  if (act) { const b = document.createElement('button'); b.className = 'tact'; b.textContent = act.label; b.onclick = () => { t.classList.remove('on'); act.fn(); }; t.append(b); }
+  t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), act ? 8000 : 3200);
+}
 function openOv(id){ $(id).classList.add('open'); }
 function closeOv(el){ el.classList.remove('open'); if (el.id === 'detailOv') S.open = null; }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeOv(b.closest('.overlay')));
@@ -691,8 +770,8 @@ async function admin(action, extra = {}){
 function applyData(d){
   const sig = JSON.stringify(d);
   if (sig === S.sig) return;
-  S.sig = sig; S.posts = d.posts; S.comments = d.comments; S.crossClass = !!d.crossClass; S.mosaic = d.mosaic || [];
-  render();
+  S.sig = sig; S.posts = d.posts; S.comments = d.comments; S.crossClass = !!d.crossClass; S.shared = !!d.sharedDevice; S.mosaic = d.mosaic || [];
+  render(); checkIdle();
   if (S.open) renderDetail(true);
 }
 /* 작품·댓글은 서버(board-admin)가 권한에 맞게 걸러서 내려줘요: 교사는 전체, 학생은 자기 반(교사가 허용하면 전체). */
@@ -700,7 +779,7 @@ async function load(){
   try {
     const d = await admin('feed');
     S.template = d.template || '';
-    applyData({ posts: d.posts || [], comments: d.comments || [], crossClass: d.crossClass, mosaic: d.mosaic });
+    applyData({ posts: d.posts || [], comments: d.comments || [], crossClass: d.crossClass, sharedDevice: d.sharedDevice, mosaic: d.mosaic });
   } catch(e){ toast(errMsg(e)); }
 }
 let loadT;
@@ -718,14 +797,35 @@ function renderWho(){
   else w.innerHTML = '';
   const c = $('#changeMe'); if (c) c.onclick = () => { $('#meT').textContent = S.me.id + ' ' + S.me.name; openOv('#meOv'); };
   $('#teacherbar').hidden = !S.pw;
+  // 지금 누구 이름으로 들어와 있는지 늘 보이게 하고, 로그아웃을 바로 누를 수 있게 해요 (공용 기기 대비).
+  const sub = $('#boardSub');
+  if (S.me && !S.pw) {
+    sub.innerHTML = `지금 <b>${esc(S.me.id)} ${esc(S.me.name)}</b> · <button class="out" id="outBtn">로그아웃</button>`;
+    $('#outBtn').onclick = doLogout;
+  } else sub.textContent = BOARD_DESC;
 }
+async function doLogout(){
+  const tok = S.me && S.me.token;
+  document.querySelectorAll('.overlay.open').forEach(o => closeOv(o));
+  logoutLocal(); openOv('#loginOv'); load();
+  if (tok) admin('logout', { token: tok }).catch(() => {});
+}
+/* 공용 기기 모드: 10분 동안 아무것도 안 하면 자동 로그아웃 */
+const IDLE_MS = 10 * 60 * 1000;
+let lastAct = store.get('artboard-last') || Date.now();
+const touchAct = () => { lastAct = Date.now(); store.set('artboard-last', lastAct); };
+['pointerdown', 'keydown', 'scroll'].forEach(ev => window.addEventListener(ev, touchAct, { passive: true, capture: true }));
+function checkIdle(){
+  if (S.shared && S.me && !S.pw && Date.now() - lastAct > IDLE_MS) { doLogout(); toast('한동안 쓰지 않아서 자동으로 로그아웃했어요.'); }
+}
+setInterval(checkIdle, 20000);
 function clearData(){ S.posts = []; S.comments = []; S.sig = ''; }
 function logoutLocal(){
   S.me = null; store.del('artboard-me'); if (!S.pw) clearData(); renderWho(); render();
   $('#stepLogin').hidden = false; $('#stepNewPin').hidden = true; $('#inPin').value = '';
 }
 let pendingMe = null;
-function enterBoard(){ S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); load(); }
+function enterBoard(){ touchAct(); S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); load(); }
 $('#loginGo').onclick = async () => {
   const id = $('#inId').value.replace(/\s/g,''), name = $('#inName').value.replace(/\s/g,''), pin = $('#inPin').value.trim();
   if (!/^\d{4,6}$/.test(id)) return toast('학번은 숫자 4~6자리로 적어 주세요.');
@@ -757,10 +857,10 @@ $('#mePinGo').onclick = async () => {
   try { await savePin($('#mePin1').value, $('#mePin2').value, S.me.token); $('#mePin1').value = $('#mePin2').value = ''; closeOv($('#meOv')); toast('PIN을 바꿨어요.'); }
   catch(e){ toast(errMsg(e)); }
 };
-$('#logoutBtn').onclick = async () => {
-  try { await admin('logout'); } catch(e){}
-  closeOv($('#meOv')); logoutLocal(); openOv('#loginOv'); load();
-};
+$('#logoutBtn').onclick = doLogout;
+// 로그인 화면: 입력칸을 누르면 위쪽 작품 띠를 접어서 입장 버튼이 키보드에 가리지 않게 해요.
+$('#loginOv').addEventListener('focusin', e => { if (e.target.matches('input')) $('#loginOv').classList.add('typing'); });
+$('#loginOv').addEventListener('focusout', () => setTimeout(() => { if (!$('#loginOv').contains(document.activeElement) || !document.activeElement.matches('input')) $('#loginOv').classList.remove('typing'); }, 100));
 
 /* ---------- 글 템플릿 (교사) ---------- */
 const TPL_EXAMPLE = '■ 작품 의도(무엇을, 왜 표현했나요?): \n\n■ 사용한 재료와 기법: \n\n■ 가장 신경 쓴 부분: \n\n■ 제작하며 느낀 점: ';
@@ -872,14 +972,57 @@ $('#teacherGo').onclick = async () => {
 };
 $('#inPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#teacherGo').click(); });
 $('#teacherOut').onclick = () => { S.pw = null; store.del('artboard-pw', true); clearData(); renderWho(); render(); load(); if (!S.me) openOv('#loginOv'); };
-$('#ccBtn').onclick = async () => {
-  const next = !S.crossClass;
-  if (!confirm(next ? '학생들이 다른 반 작품도 볼 수 있게 할까요? (댓글은 자기 반 작품에만 달 수 있어요)' : '학생들이 자기 반 작품만 보게 할까요?')) return;
-  const b = $('#ccBtn'); b.disabled = true;
-  try { await admin('set_cross_class', { on: next }); await load(); toast(next ? '이제 학생들이 다른 반 작품도 볼 수 있어요.' : '이제 학생들은 자기 반 작품만 볼 수 있어요.'); }
+/* 게시판 설정 */
+function syncSettings(){
+  $('#ccTgl').setAttribute('aria-checked', !!S.crossClass);
+  $('#sdTgl').setAttribute('aria-checked', !!S.shared);
+}
+$('#setBtn').onclick = () => { syncSettings(); openOv('#setOv'); };
+async function setFlag(btn, key, next, ask, done){
+  if (!confirm(ask)) return;
+  btn.disabled = true;
+  try { await admin('set_flag', { key, on: next }); await load(); syncSettings(); toast(done); }
   catch(e){ toast(errMsg(e)); }
-  b.disabled = false;
+  btn.disabled = false;
+}
+$('#ccTgl').onclick = () => { const next = !S.crossClass; setFlag($('#ccTgl'), 'cross_class_view', next,
+  next ? '학생들이 다른 반 작품도 볼 수 있게 할까요? (댓글은 자기 반 작품에만 달 수 있어요)' : '학생들이 자기 반 작품만 보게 할까요?',
+  next ? '이제 학생들이 다른 반 작품도 볼 수 있어요.' : '이제 학생들은 자기 반 작품만 볼 수 있어요.'); };
+$('#sdTgl').onclick = () => { const next = !S.shared; setFlag($('#sdTgl'), 'shared_device', next,
+  next ? '공용 기기 모드를 켤까요? 10분 동안 쓰지 않으면 자동 로그아웃되고, 새로 로그인하면 12시간 뒤 다시 로그인해야 해요.' : '공용 기기 모드를 끌까요? 학생 로그인이 60일 동안 유지돼요.',
+  next ? '공용 기기 모드를 켰어요.' : '공용 기기 모드를 껐어요.'); };
+
+/* 제출 현황 */
+let subRoster = [];
+$('#subBtn').onclick = async () => {
+  openOv('#subOv'); $('#subBody').innerHTML = '<p class="hint">불러오는 중…</p>';
+  try { subRoster = (await admin('roster_list')).students; await load(); renderSub(); }
+  catch(e){ $('#subBody').innerHTML = `<p class="hint">${esc(errMsg(e))}</p>`; }
 };
+$('#subClass').onchange = $('#subPeriod').onchange = () => renderSub();
+function renderSub(){
+  const classes = [...new Set(subRoster.map(r => classOf(r.student_id)))].sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
+  const sel = $('#subClass'), cur = sel.value || (S.tab !== '전체' ? S.tab : classes[0]);
+  sel.innerHTML = classes.map(c => `<option value="${esc(c)}">${esc(c)}반</option>`).join('');
+  if (!classes.length) { $('#subBody').innerHTML = '<p class="hint">학생 명단이 없어요. ‘학생 명단·PIN’에서 먼저 명단을 넣어 주세요.</p>'; return; }
+  sel.value = classes.includes(cur) ? cur : classes[0];
+  const period = $('#subPeriod').value, now = new Date(), today = now.toDateString();
+  const inPeriod = p => period === 'all' || (period === 'today' ? new Date(p.created_at).toDateString() === today : now - new Date(p.created_at) < 7 * 86400e3);
+  const count = {};
+  S.posts.filter(inPeriod).forEach(p => { count[p.student_id] = (count[p.student_id] || 0) + 1; });
+  const studs = subRoster.filter(r => classOf(r.student_id) === sel.value);
+  const done = studs.filter(r => count[r.student_id]), todo = studs.filter(r => !count[r.student_id]);
+  const chip = (r, n) => `<span>${esc(r.student_id)} ${esc(r.name)}${n ? `<span class="cnt">${n}점</span>` : ''}</span>`;
+  $('#subBody').innerHTML = `
+    <div class="subsum"><div><b>${done.length}</b>제출</div><div class="no"><b>${todo.length}</b>미제출</div><div><b>${studs.length}</b>전체</div></div>
+    <div class="subh"><span>미제출 ${todo.length}명</span>${todo.length ? '<button class="btn" id="subCopy">명단 복사</button>' : ''}</div>
+    <div class="chips">${todo.length ? todo.map(r => chip(r)).join('') : '<p class="hint">모두 제출했어요.</p>'}</div>
+    <div class="subh"><span>제출 ${done.length}명</span></div>
+    <div class="chips">${done.length ? done.map(r => chip(r, count[r.student_id])).join('') : '<p class="hint">아직 제출한 학생이 없어요.</p>'}</div>`;
+  const cp = $('#subCopy'); if (cp) cp.onclick = async () => {
+    try { await navigator.clipboard.writeText(todo.map(r => r.student_id + ' ' + r.name).join('\n')); toast('미제출 명단을 복사했어요.'); } catch(e){ toast('복사하지 못했어요.'); }
+  };
+}
 $('#pwBtn').onclick = () => { openOv('#pwOv'); setTimeout(() => $('#inNewPw').focus(), 50); };
 $('#pwGo').onclick = async () => {
   const next = $('#inNewPw').value;
@@ -938,7 +1081,7 @@ function render(){
   // 학생은 교사가 '다른 반 보기'를 켰을 때만 '전체'와 다른 반 탭이 보여요 (서버도 자기 반 작품만 보내요).
   const tabs = (S.pw || S.crossClass || !S.me) ? ['전체', ...classes] : classes;
   if (!tabs.includes(S.tab)) S.tab = tabs[0] || '전체';
-  const cc = $('#ccBtn'); cc.textContent = '다른 반 보기: ' + (S.crossClass ? '켜짐' : '꺼짐'); cc.setAttribute('aria-pressed', !!S.crossClass);
+  $('#tabs').hidden = tabs.length <= 1;
   $('#tabs').innerHTML = tabs.map(t => `<button class="story" aria-pressed="${t === S.tab}" data-tab="${esc(t)}">
       <span class="ring"><span>${t === '전체' ? 'ALL' : esc(t)}</span></span>${t === '전체' ? '전체' : esc(t) + '반'}</button>`).join('');
   $('#tabs').querySelectorAll('.story').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
@@ -975,7 +1118,7 @@ function render(){
         <p class="pcap"><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? `<span class="d">${esc(p.description)}</span>` : ''}</p>
         ${shown.map(c => `<p class="prev"><b>${c.role === 'teacher' ? '선생님' + VER : esc(c.name)}</b>${esc(c.body)}</p>`).join('')}
         ${cs.length > shown.length ? `<button class="more" data-post="${p.id}">댓글 ${cs.length}개 모두 보기</button>` : ''}
-        <div class="when">${rel(p.created_at)}</div>
+        <div class="when">${rel(p.created_at)}${p.edited_at ? ' · 수정됨' : ''}</div>
       </article>`;
     }).join('');
   }
@@ -991,6 +1134,7 @@ function renderDetail(keepDraft){
   const cs = S.comments.filter(c => c.post_id === p.id);
   const mine = S.me && S.me.id === p.student_id && S.me.name === p.name;
   const acts = [];
+  if (mine) acts.push(`<button class="btn" id="editPost">수정하기</button>`);
   if (S.pw || mine) acts.push(`<button class="btn" id="dlPost">${S.pw ? '원본 내려받기' : '내 작품 내려받기'}</button>`);
   if (S.pw || mine) acts.push(`<button class="btn danger" id="delPost">작품 지우기</button>`);
   const pAv = av(p.student_id + p.name, short(p.name), 'sm');
@@ -1002,7 +1146,7 @@ function renderDetail(keepDraft){
     <div class="dside">
       <div class="ph">${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반</small></div></div>
       <div class="dscroll" id="dscroll">
-        <div class="cm">${pAv}<div><p><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? esc(p.description) : ''}</p><small>${rel(p.created_at)}</small></div></div>
+        <div class="cm">${pAv}<div><p><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? esc(p.description) : ''}</p><small>${rel(p.created_at)}${p.edited_at ? ' · 수정됨' : ''}</small></div></div>
         ${acts.length ? `<div class="acts">${acts.join('')}</div>` : ''}
         ${cs.length ? cs.map(c => {
           const t = c.role === 'teacher';
@@ -1027,6 +1171,7 @@ function renderDetail(keepDraft){
   $('#dscroll').scrollTop = keepScroll;
   $('#dClose').onclick = () => closeOv($('#detailOv'));
   const dp = $('#delPost'); if (dp) dp.onclick = delPost;
+  const ep = $('#editPost'); if (ep) ep.onclick = () => editPost(p);
   const dl = $('#dlPost'); if (dl) dl.onclick = async () => { try { saveBlob(await fetchBlob(p.image_path), p.file_name); } catch(e){ toast(errMsg(e)); } };
   $('#detail').querySelectorAll('[data-del]').forEach(b => b.onclick = () => delComment(b.dataset.del));
 }
@@ -1058,23 +1203,43 @@ async function delPost(){
 const E = { base: null, rot90: null, flat: null, geom: null, rot: 0, angle: 0, pts: null, fp: null, crop: null, sel: null, ratio: 'free', mode: null, drag: null, grid: false, auto: null, adj: { b: 0, c: 0, s: 0, t: 0 } };
 const pv = $('#preview');
 
+function setUpMode(editing){
+  if (!!S.editing !== !!editing || (editing && S.editing !== editing)) { $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; }
+  S.editing = editing || null;
+  $('#upT').textContent = editing ? '작품 수정하기' : '작품 올리기';
+  $('#submitBtn').textContent = editing ? '수정 저장' : '작품 올리기';
+  $('#editNote').hidden = !editing;
+}
 $('#fab').onclick = () => {
   if (!S.me && !S.pw) return openOv('#loginOv');
   if (!S.me) return toast('교사 모드에서는 작품을 올릴 수 없어요. 학생 학번으로 들어와 주세요.');
+  setUpMode(null);
   if (!$('#inDesc').value.trim() && S.template) $('#inDesc').value = S.template;
   $('#tplReload').hidden = !S.template;
-  showStep('pick'); openOv('#upOv');
+  showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
 };
+async function editPost(p){
+  toast('작품을 불러오는 중…');
+  try {
+    const blob = await fetchBlob(p.image_path);
+    setUpMode(p.id);
+    $('#inTitle').value = p.title === '무제' ? '' : p.title; $('#inDesc').value = p.description || '';
+    $('#tplReload').hidden = !S.template;
+    closeOv($('#detailOv')); openOv('#upOv');
+    loadFile(blob, false);
+  } catch(e){ toast(errMsg(e)); }
+}
 $('#tplReload').onclick = () => {
   const cur = $('#inDesc').value.trim();
   if (cur && cur !== S.template.trim() && !confirm('지금 쓴 설명을 지우고 템플릿을 다시 넣을까요?')) return;
   $('#inDesc').value = S.template; $('#inDesc').focus();
 };
-function showStep(s){ $('#stepPick').hidden = s !== 'pick'; $('#stepEdit').hidden = s !== 'edit'; }
-['#camIn', '#fileIn'].forEach(sel => $(sel).onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadFile(f); });
+function showStep(s){ $('#stepPick').hidden = s !== 'pick'; $('#stepEdit').hidden = s !== 'edit'; $('#pickBackRow').hidden = !(s === 'pick' && E.rot90); }
+['#camIn', '#fileIn'].forEach(sel => $(sel).onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadFile(f, true); });
 $('#repick').onclick = () => showStep('pick');
+$('#pickBack').onclick = () => showStep('edit');
 
-function loadFile(file){
+function loadFile(file, fresh = true){
   const url = URL.createObjectURL(file), img = new Image();
   img.onload = () => {
     const k = Math.min(1, 2000 / Math.max(img.naturalWidth, img.naturalHeight));
@@ -1082,7 +1247,7 @@ function loadFile(file){
     c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
-    E.base = c; E.rot = 0; resetEdits(); showStep('edit');
+    E.base = c; E.rot = 0; E.fresh = fresh; resetEdits(); showStep('edit');
   };
   img.onerror = () => { URL.revokeObjectURL(url); toast('이 사진 형식은 열 수 없어요. JPG나 PNG 사진으로 골라 주세요.'); };
   img.src = url;
@@ -1256,7 +1421,7 @@ function setMode(m){
   E.mode = m; E.drag = null; pv.style.cursor = '';
   $('#cropbar').classList.toggle('on', m === 'crop');
   $('#flatbar').classList.toggle('on', m === 'flat');
-  $('#tools').hidden = $('#sliders').hidden = !!m;
+  $('#tools').hidden = $('#sliders').hidden = $('#upFoot').hidden = !!m;
 }
 function endMode(){ setMode(null); }
 const clamp = v => Math.max(0, Math.min(1, v));
@@ -1451,25 +1616,40 @@ $('#submitBtn').onclick = async () => {
   if (!E.rot90) return toast('사진을 먼저 골라 주세요.');
   if (E.mode) return toast(E.mode === 'crop' ? '자르기를 적용하거나 취소해 주세요.' : '펴기를 적용하거나 취소해 주세요.');
   if (S.template && $('#inDesc').value.trim() === S.template.trim()) { $('#inDesc').focus(); return toast('작품 설명 템플릿의 빈칸을 채워 주세요.'); }
-  const b = $('#submitBtn'); b.disabled = true; b.textContent = '올리는 중…';
+  const editing = S.editing, label = $('#submitBtn').textContent;
+  const b = $('#submitBtn'); b.disabled = true; b.textContent = editing ? '저장하는 중…' : '올리는 중…';
   try {
-    const full = await toBlob(renderOut(2000, true), 0.88);
-    const thumb = await toBlob(renderOut(700, true), 0.82);
-    const u = await admin('upload_urls');
-    for (const [slot, blob] of [[u.full, full], [u.thumb, thumb]]) {
-      const { error } = await sb.storage.from(BUCKET).uploadToSignedUrl(slot.path, slot.token, blob, { contentType: 'image/jpeg' });
-      if (error) throw new Error('사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요.');
+    const fields = { title: $('#inTitle').value.trim().slice(0, 60) || '무제', description: $('#inDesc').value.trim().slice(0, 1000) };
+    // 수정할 때 사진을 손대지 않았으면 사진은 다시 올리지 않아요.
+    const photoChanged = !editing || E.fresh || E.rot || E.angle || E.flat || E.crop || edited();
+    if (photoChanged) {
+      const full = await toBlob(renderOut(2000, true), 0.88);
+      const thumb = await toBlob(renderOut(700, true), 0.82);
+      const u = await admin('upload_urls');
+      for (const [slot, blob] of [[u.full, full], [u.thumb, thumb]]) {
+        const { error } = await sb.storage.from(BUCKET).uploadToSignedUrl(slot.path, slot.token, blob, { contentType: 'image/jpeg' });
+        if (error) throw new Error('사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요.');
+      }
+      fields.image_path = u.full.path; fields.thumb_path = u.thumb.path;
     }
-    await admin('create_post', {
-      title: $('#inTitle').value.trim().slice(0, 60) || '무제',
-      description: $('#inDesc').value.trim().slice(0, 1000),
-      image_path: u.full.path, thumb_path: u.thumb.path,
-    });
-    $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null;
-    closeOv($('#upOv')); S.tab = classOf(S.me.id); await load(); toast('작품을 올렸어요.');
+    if (editing) await admin('update_post', { postId: editing, ...fields });
+    else await admin('create_post', fields);
+    $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; S.editing = null;
+    closeOv($('#upOv')); S.tab = classOf(S.me.id); await load();
+    if (editing) { toast('작품을 고쳤어요.'); openPost(editing); }
+    else afterUpload();
   } catch(e){ toast(errMsg(e)); }
-  b.disabled = false; b.textContent = '작품 올리기';
+  b.disabled = false; b.textContent = label;
 };
+// 올린 뒤: 공용 기기면 로그아웃을 크게 권하고, 아니면 알림에 로그아웃 버튼을 붙여요.
+function afterUpload(){
+  if (S.shared) {
+    $('#doneWho').textContent = `다른 친구가 이 기기를 이어서 쓴다면 꼭 로그아웃해 주세요. 그대로 두면 다음 친구의 작품과 댓글이 ‘${S.me.id} ${S.me.name}’ 이름으로 올라가요.`;
+    openOv('#doneOv');
+  } else toast('작품을 올렸어요. 다른 친구가 이어서 쓰나요?', { label: '로그아웃', fn: doLogout });
+}
+$('#doneOut').onclick = () => { closeOv($('#doneOv')); doLogout(); };
+$('#doneStay').onclick = () => closeOv($('#doneOv'));
 
 /* ---------- 시작 ---------- */
 S.me = store.get('artboard-me');
