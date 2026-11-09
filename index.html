@@ -991,7 +991,7 @@ function renderDetail(keepDraft){
   const cs = S.comments.filter(c => c.post_id === p.id);
   const mine = S.me && S.me.id === p.student_id && S.me.name === p.name;
   const acts = [];
-  if (S.pw) acts.push(`<button class="btn" id="dlPost">원본 내려받기</button>`);
+  if (S.pw || mine) acts.push(`<button class="btn" id="dlPost">${S.pw ? '원본 내려받기' : '내 작품 내려받기'}</button>`);
   if (S.pw || mine) acts.push(`<button class="btn danger" id="delPost">작품 지우기</button>`);
   const pAv = av(p.student_id + p.name, short(p.name), 'sm');
   // 학생은 자기 반 작품에만 댓글을 달 수 있어요 (서버에서도 막아요).
