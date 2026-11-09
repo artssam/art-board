@@ -599,7 +599,6 @@ textarea.f{resize:vertical;min-height:72px}
       <div class="dlabel"><label class="f" for="inDesc">작품 설명</label><button class="btn link" id="tplReload" hidden>템플릿 다시 넣기</button></div>
       <textarea class="f" id="inDesc" maxlength="1000" rows="7" placeholder="무엇을, 왜 표현했는지 적어 보세요"></textarea>
       <div class="row"><button class="btn primary" id="submitBtn">작품 올리기</button></div>
-      <p class="hint" id="saveName"></p>
     </div>
   </div>
 </div>
@@ -1084,7 +1083,6 @@ function loadFile(file){
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
     E.base = c; E.rot = 0; resetEdits(); showStep('edit');
-    $('#saveName').textContent = `‘${S.me.id} ${S.me.name}.jpg’ 이름으로 저장돼요.`;
   };
   img.onerror = () => { URL.revokeObjectURL(url); toast('이 사진 형식은 열 수 없어요. JPG나 PNG 사진으로 골라 주세요.'); };
   img.src = url;
