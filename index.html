@@ -258,6 +258,43 @@ textarea.f{resize:vertical;min-height:72px}
 .rc .ra{display:flex;gap:6px;margin-top:6px}
 .rc .ra .btn{min-height:44px;padding:0 12px;font-size:13px}
 
+/* 과제 고르기 줄 */
+.asgbar{max-width:935px;margin:0 auto;padding:0 12px 10px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.asgbar::-webkit-scrollbar{display:none}
+.asgbar button{flex:none;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;white-space:nowrap}
+.asgbar button[aria-pressed="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.asgbar .cl{color:var(--muted);font-weight:400}
+.asgbar button[aria-pressed="true"] .cl{color:inherit;opacity:.7}
+/* 고정·교사 게시물 */
+.pin{margin-left:auto;font-size:12px;font-weight:700;color:var(--blue-ink);background:var(--tbg);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.tpost{outline:2px solid var(--tbg);outline-offset:-2px}
+.tnote{display:block;width:100%;text-align:left;padding:4px 12px 0}
+.tnote .ttl{display:block;font-weight:800;font-size:17px;font-family:var(--font-ttl,inherit)}
+.tnote .d{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;margin-top:4px}
+.g.gt{display:flex;align-items:center;justify-content:center;padding:10px;background:var(--tbg);color:var(--blue-ink);font-weight:800;text-align:center;font-size:13px;line-height:1.3}
+.g .pinmark{position:absolute;top:6px;left:6px;font-size:16px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.sheet.detail.noimg{grid-template-columns:1fr;max-width:640px}
+.sheet.detail.noimg .dimg{display:none}
+.sheet.detail.noimg .dside{border-left:0}
+.dside > .ph .pin{margin-right:12px}
+.sheet.detail.noimg .close{color:var(--text)!important;text-shadow:none!important}
+/* 비공개 피드백 */
+.lock{display:inline-block;font-size:11px;font-weight:700;color:var(--muted);background:var(--soft);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+.vis{display:flex;gap:6px;margin:0 0 6px}
+.vis label{display:flex;align-items:center;gap:5px;min-height:36px;padding:0 12px;border-radius:999px;background:var(--soft);font-size:13px;font-weight:600;cursor:pointer}
+.vis input{accent-color:var(--blue);width:16px;height:16px}
+.vis label:has(input:checked){background:var(--tbg);color:var(--blue-ink)}
+/* 과제 관리 */
+.asgl{display:flex;flex-direction:column;margin-top:12px}
+.asgl button{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 4px;border-bottom:1px solid var(--line);text-align:left}
+.asgl b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asgl .st{font-size:12px;padding:2px 9px;border-radius:999px;background:var(--tbg);color:var(--blue-ink);font-weight:700}
+.asgl .st.off{background:var(--soft);color:var(--muted)}
+.asgl small{color:var(--muted);font-size:12px}
+.asgl button[aria-current="true"]{background:var(--soft)}
+.fsel{width:100%;min-height:44px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:var(--soft);font-size:16px}
+.nophoto .stage,.nophoto #tools,.nophoto #sliders,.nophoto .modebar,.nophoto #editNote{display:none!important}
+
 /* 설정 스위치 */
 .setrow{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
 .setrow > div{flex:1;min-width:0}
@@ -515,6 +552,7 @@ textarea.f{resize:vertical;min-height:72px}
 </div>
 
 <nav class="stories" id="tabs" aria-label="반 선택"></nav>
+<nav class="asgbar" id="asgBar" aria-label="과제 고르기" hidden></nav>
 <div class="viewbar">
   <p class="sub" id="boardSub"></p>
   <div class="seg" role="group" aria-label="보기 방식">
@@ -575,18 +613,22 @@ textarea.f{resize:vertical;min-height:72px}
   </div>
 </div>
 
-<!-- 글 템플릿 (교사) -->
-<div class="overlay" id="tplOv">
-  <div class="sheet wide" role="dialog" aria-labelledby="tplT" style="max-width:600px">
+<!-- 과제 관리 (교사) -->
+<div class="overlay" id="asgOv">
+  <div class="sheet wide" role="dialog" aria-labelledby="asgT" style="max-width:600px">
     <button class="close" data-close aria-label="닫기">×</button>
-    <h2 id="tplT">작품 설명 템플릿</h2>
-    <p class="hint" style="text-align:center">학생이 작품을 올릴 때 설명 칸에 이 내용이 미리 채워져요. 학생은 빈칸을 채워서 올려요.</p>
-    <label class="f" for="tplIn">템플릿 내용</label>
-    <textarea class="f" id="tplIn" rows="9" maxlength="600" placeholder="예)&#10;■ 작품 의도: &#10;■ 사용한 재료와 기법: &#10;■ 가장 신경 쓴 부분: &#10;■ 제작하며 느낀 점: "></textarea>
-    <p class="hint"><span id="tplCount">0</span>/600자 · 비워 두고 저장하면 템플릿 없이 빈 칸으로 올라가요.</p>
-    <div class="row">
-      <button class="btn" id="tplExample">예시 넣기</button>
-      <button class="btn primary" id="tplSave">저장</button>
+    <h2 id="asgT">과제 관리</h2>
+    <p class="hint" style="text-align:center">과제마다 글 템플릿을 따로 정할 수 있어요. 학생은 ‘진행 중’인 과제에만 작품을 올릴 수 있어요.</p>
+    <div class="asgl" id="asgList"></div>
+    <div class="row"><button class="btn" id="asgNew">+ 새 과제</button></div>
+    <div id="asgForm" hidden>
+      <label class="f" for="asgTitle">과제 이름</label>
+      <input class="f" id="asgTitle" maxlength="40" placeholder="예: 자화상, 사회참여미술, 점토">
+      <label class="f" for="tplIn">글 템플릿</label>
+      <textarea class="f" id="tplIn" rows="7" maxlength="600" placeholder="예)&#10;■ 작품 의도: &#10;■ 사용한 재료와 기법: &#10;■ 가장 신경 쓴 부분: &#10;■ 제작하며 느낀 점: "></textarea>
+      <p class="hint"><span id="tplCount">0</span>/600자 · 비워 두면 학생 설명 칸이 빈 칸으로 열려요.</p>
+      <label class="autonext" style="font-size:14px;color:var(--text)"><input type="checkbox" id="asgOpen" checked> 진행 중 (학생이 이 과제에 작품을 올릴 수 있어요)</label>
+      <div class="row"><button class="btn" id="tplExample">예시 넣기</button><button class="btn danger" id="asgDel">과제 지우기</button><button class="btn primary" id="tplSave">저장</button></div>
     </div>
   </div>
 </div>
@@ -630,7 +672,8 @@ textarea.f{resize:vertical;min-height:72px}
     <h2 id="setT">교사 메뉴</h2>
     <div class="menu">
       <p class="mh">관리</p>
-      <button class="mi" id="tplBtn">글 템플릿</button>
+      <button class="mi" id="tplBtn">과제 관리 (과제별 글 템플릿)</button>
+      <button class="mi" id="tpostBtn">예시·공지 올리기 (맨 위 고정)</button>
       <button class="mi" id="rosterBtn">학생 명단·PIN</button>
       <button class="mi" id="snipBtn">피드백 상용구</button>
       <button class="mi" id="csvBtn">작품 목록 내보내기 (엑셀 CSV)</button>
@@ -675,7 +718,9 @@ textarea.f{resize:vertical;min-height:72px}
     <h2 id="csvT">작품 목록 내보내기</h2>
     <p class="hint" style="text-align:center">학번, 이름, 반, 제목, 설명, 교사 피드백, 받은 댓글 수를 엑셀에서 바로 열 수 있는 CSV로 받아요.</p>
     <label class="f" for="csvClass">반</label>
-    <select class="f" id="csvClass" style="width:100%;min-height:44px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:var(--soft)"></select>
+    <select class="fsel" id="csvClass"></select>
+    <label class="f" for="csvAsg">과제</label>
+    <select class="fsel" id="csvAsg"></select>
     <div class="row"><button class="btn primary" id="csvGo">CSV 내려받기</button></div>
   </div>
 </div>
@@ -687,6 +732,7 @@ textarea.f{resize:vertical;min-height:72px}
     <h2 id="subT">제출 현황</h2>
     <div class="rbar" style="border-top:0;padding-top:0;margin-top:14px">
       <select id="subClass" aria-label="반 고르기"></select>
+      <select id="subAsg" aria-label="과제" style="margin-right:0"></select>
       <select id="subPeriod" aria-label="기간" style="margin-right:0"><option value="all">전체 기간</option><option value="today">오늘</option><option value="week">최근 7일</option></select>
     </div>
     <div id="subBody"><p class="hint">불러오는 중…</p></div>
@@ -726,6 +772,7 @@ textarea.f{resize:vertical;min-height:72px}
         <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>사진 고르기<span>앨범·파일에서 선택</span><input type="file" accept="image/*" id="fileIn"></label>
       </div>
       <div class="row" id="pickBackRow" hidden><button class="btn link" id="pickBack">← 고르던 사진으로 돌아가기</button></div>
+      <div class="row" id="noPhotoRow" hidden><button class="btn" id="noPhotoBtn" style="flex:1">사진 없이 공지만 쓰기</button></div>
     </div>
     <div id="stepEdit" hidden>
       <p class="editnote" id="editNote" hidden>사진은 그대로 두고 제목·설명만 고칠 수 있어요. 사진을 바꾸려면 아래 보정 도구를 쓰거나 ‘다른 사진 고르기’를 누르세요. 받은 댓글과 피드백은 그대로 남아요.</p>
@@ -769,10 +816,14 @@ textarea.f{resize:vertical;min-height:72px}
         <div class="sl"><label for="sS">채도</label><input type="range" id="sS" min="-50" max="50" value="0"><output id="oS">0</output></div>
         <div class="sl"><label for="sT">색온도</label><input type="range" id="sT" min="-50" max="50" value="0"><output id="oT">0</output></div>
       </div>
-      <label class="f" for="inTitle">작품 제목</label>
+      <div class="row" id="addPhotoRow" hidden><button class="btn" id="addPhoto" style="flex:1">+ 사진 넣기</button></div>
+      <label class="f" for="inAssign">과제</label>
+      <select class="fsel" id="inAssign"></select>
+      <label class="f" for="inTitle" id="inTitleL">작품 제목</label>
       <input class="f" id="inTitle" maxlength="60" placeholder="제목이 없으면 ‘무제’로 올라가요">
       <div class="dlabel"><label class="f" for="inDesc">작품 설명</label><button class="btn link" id="tplReload" hidden>템플릿 다시 넣기</button></div>
       <textarea class="f" id="inDesc" maxlength="1000" rows="7" placeholder="무엇을, 왜 표현했는지 적어 보세요"></textarea>
+      <label class="autonext" id="inPinRow" hidden style="margin-top:10px;font-size:14px;color:var(--text)"><input type="checkbox" id="inPinned" checked> 과제 맨 위에 고정하기</label>
       <div class="upfoot" id="upFoot"><button class="btn primary" id="submitBtn">작품 올리기</button></div>
     </div>
   </div>
@@ -808,7 +859,14 @@ if (SKIN !== 'feed') document.documentElement.dataset.skin = SKIN;
 if (FONT !== 'skin') document.documentElement.dataset.font = FONT;
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const S = { posts: [], comments: [], sig: '', me: null, pw: null, tab: '전체', open: null };
+const S = { posts: [], tposts: [], assign: [], comments: [], sig: '', me: null, pw: null, tab: '전체', open: null, aid: 'all', vis: 'public' };
+// S.posts = 학생 작품, S.tposts = 교사 게시물(예시·공지). 제출 현황·진행 표시·내보내기는 학생 작품만 세요.
+const allPosts = () => S.tposts.concat(S.posts);
+const findPost = id => allPosts().find(p => p.id === id);
+const asgOf = id => S.assign.find(a => a.id === id);
+const asgName = id => (asgOf(id) || {}).title || '';
+const tplOf = id => (asgOf(id) || {}).template || '';
+const inAsg = p => S.aid === 'all' || p.assignment_id === S.aid;
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const errMsg = e => String((e && e.message) || e).replace(/^Error:\s*/, '');
@@ -841,6 +899,7 @@ function rel(t){
   return fmt(t).split(' ')[0];
 }
 S.view = store.get('artboard-view') || 'feed';
+S.aid = store.get('artboard-aid') || 'all';
 
 let toastT;
 function toast(m, act){
@@ -871,7 +930,9 @@ async function admin(action, extra = {}){
 function applyData(d){
   const sig = JSON.stringify(d);
   if (sig === S.sig) return;
-  S.sig = sig; S.posts = d.posts; S.comments = d.comments; S.crossClass = !!d.crossClass; S.shared = !!d.sharedDevice; S.mosaic = d.mosaic || []; S.snippets = d.snippets || [];
+  S.sig = sig; S.posts = d.posts.filter(p => p.author_role !== 'teacher'); S.tposts = d.posts.filter(p => p.author_role === 'teacher');
+  S.assign = d.assignments || []; if (S.aid !== 'all' && !asgOf(S.aid)) S.aid = 'all';
+  S.comments = d.comments; S.crossClass = !!d.crossClass; S.shared = !!d.sharedDevice; S.mosaic = d.mosaic || []; S.snippets = d.snippets || [];
   render(); checkIdle();
   if (S.open) renderDetail(true);
 }
@@ -879,8 +940,7 @@ function applyData(d){
 async function load(){
   try {
     const d = await admin('feed');
-    S.template = d.template || '';
-    applyData({ posts: d.posts || [], comments: d.comments || [], crossClass: d.crossClass, sharedDevice: d.sharedDevice, mosaic: d.mosaic, snippets: d.snippets });
+    applyData({ posts: d.posts || [], comments: d.comments || [], assignments: d.assignments || [], crossClass: d.crossClass, sharedDevice: d.sharedDevice, mosaic: d.mosaic, snippets: d.snippets });
   } catch(e){ toast(errMsg(e)); }
 }
 let loadT;
@@ -963,17 +1023,38 @@ $('#loginOv').addEventListener('focusout', () => setTimeout(() => { if (!$('#log
 /* ---------- 글 템플릿 (교사) ---------- */
 const TPL_EXAMPLE = '■ 작품 의도(무엇을, 왜 표현했나요?): \n\n■ 사용한 재료와 기법: \n\n■ 가장 신경 쓴 부분: \n\n■ 제작하며 느낀 점: ';
 const tplCount = () => { $('#tplCount').textContent = $('#tplIn').value.length; };
-$('#tplBtn').onclick = async () => { await load(); $('#tplIn').value = S.template || ''; tplCount(); openOv('#tplOv'); setTimeout(() => $('#tplIn').focus(), 50); };
+let asgEdit = null;
+function renderAsgList(){
+  const n = id => allPosts().filter(p => p.assignment_id === id).length;
+  $('#asgList').innerHTML = S.assign.map(a => `<button data-asg="${a.id}" aria-current="${a.id === asgEdit}"><b>${esc(a.title)}</b><span class="st ${a.open ? '' : 'off'}">${a.open ? '진행 중' : '마감'}</span><small>게시물 ${n(a.id)}</small></button>`).join('');
+  $('#asgList').querySelectorAll('[data-asg]').forEach(b => b.onclick = () => editAsg(asgOf(b.dataset.asg)));
+}
+function editAsg(a){
+  asgEdit = a ? a.id : null;
+  $('#asgTitle').value = a ? a.title : ''; $('#tplIn').value = a ? a.template : ''; $('#asgOpen').checked = a ? a.open : true;
+  $('#asgDel').hidden = !a; tplCount(); $('#asgForm').hidden = false; renderAsgList();
+  setTimeout(() => $('#asgTitle').focus(), 50);
+}
+$('#tplBtn').onclick = async () => { await load(); asgEdit = null; $('#asgForm').hidden = true; renderAsgList(); openOv('#asgOv'); };
+$('#asgNew').onclick = () => editAsg(null);
 $('#tplIn').oninput = tplCount;
 $('#tplExample').onclick = () => {
   if ($('#tplIn').value.trim() && !confirm('지금 내용을 예시로 바꿀까요?')) return;
   $('#tplIn').value = TPL_EXAMPLE; tplCount();
 };
 $('#tplSave').onclick = async () => {
+  const title = $('#asgTitle').value.trim(); if (!title) return toast('과제 이름을 적어 주세요.');
   const b = $('#tplSave'); b.disabled = true;
-  try { await admin('set_template', { template: $('#tplIn').value }); S.template = $('#tplIn').value.replace(/\r\n/g, '\n'); closeOv($('#tplOv')); toast(S.template.trim() ? '템플릿을 저장했어요. 학생 글쓰기 칸에 바로 적용돼요.' : '템플릿을 비웠어요.'); }
-  catch(e){ toast(errMsg(e)); }
+  try {
+    await admin('save_assignment', { id: asgEdit, title, template: $('#tplIn').value, open: $('#asgOpen').checked });
+    await load(); $('#asgForm').hidden = true; asgEdit = null; renderAsgList(); toast(`‘${title}’ 과제를 저장했어요.`);
+  } catch(e){ toast(errMsg(e)); }
   b.disabled = false;
+};
+$('#asgDel').onclick = async () => {
+  const a = asgOf(asgEdit); if (!a || !confirm(`‘${a.title}’ 과제를 지울까요?`)) return;
+  try { await admin('delete_assignment', { id: a.id }); await load(); $('#asgForm').hidden = true; asgEdit = null; renderAsgList(); toast('과제를 지웠어요.'); }
+  catch(e){ toast(errMsg(e)); }
 };
 
 /* ---------- 학생 명단 (교사) ---------- */
@@ -1133,14 +1214,14 @@ $('#recentBtn').onclick = async () => {
 };
 $('#recentClass').onchange = () => renderRecent();
 function renderRecent(){
-  const cls = $('#recentClass').value, post = id => S.posts.find(p => p.id === id);
+  const cls = $('#recentClass').value, post = id => S.posts.find(p => p.id === id); // 학생 작품의 댓글만 (교사 게시물에는 댓글이 없어요)
   const list = S.comments.filter(c => { const p = post(c.post_id); return p && (cls === '전체' || classOf(p.student_id) === cls); })
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 150);
   $('#recentList').innerHTML = list.length ? list.map(c => {
     const p = post(c.post_id), t = c.role === 'teacher';
     return `<div class="rc">${t ? tAv('sm') : av(c.student_id + c.name, short(c.name), 'sm')}<div>
       <small>${t ? '선생님' : esc(c.student_id + ' ' + c.name)} → ${esc(classOf(p.student_id))}반 ${esc(p.name)}의 ‘${esc(p.title)}’ · ${rel(c.created_at)}</small>
-      <p>${esc(c.body)}</p>
+      <p>${c.visibility === 'private' ? '<span class="lock">🔒 본인만</span> ' : ''}${esc(c.body)}</p>
       <div class="ra"><button class="btn" data-go="${p.id}">작품 보기</button><button class="btn danger" data-rdel="${c.id}">지우기</button></div></div></div>`;
   }).join('') : '<p class="hint" style="text-align:center;padding:20px 0">아직 댓글이 없어요.</p>';
   $('#recentList').querySelectorAll('[data-go]').forEach(b => b.onclick = () => { closeOv($('#recentOv')); if (!(S.listIds || []).includes(b.dataset.go)) S.listIds = [b.dataset.go]; openPost(b.dataset.go); });
@@ -1151,25 +1232,27 @@ function renderRecent(){
 }
 
 /* 내보내기: 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM을 붙인 CSV */
+const asgOptions = () => [{ id: 'all', title: '모든 과제' }, ...S.assign].map(a => `<option value="${a.id}">${esc(a.title)}</option>`).join('');
 $('#csvBtn').onclick = () => {
+  $('#csvAsg').innerHTML = asgOptions(); $('#csvAsg').value = S.aid;
   $('#csvClass').innerHTML = ['전체', ...classesOf()].map(c => `<option value="${esc(c)}">${c === '전체' ? '모든 반' : esc(c) + '반'}</option>`).join('');
   $('#csvClass').value = S.tab !== '전체' && classesOf().includes(S.tab) ? S.tab : '전체';
   openOv('#csvOv');
 };
-function csvRows(cls){
-  const posts = S.posts.filter(p => cls === '전체' || classOf(p.student_id) === cls)
+function csvRows(cls, aid = 'all'){
+  const posts = S.posts.filter(p => (cls === '전체' || classOf(p.student_id) === cls) && (aid === 'all' || p.assignment_id === aid))
     .sort((a, b) => a.student_id.localeCompare(b.student_id) || new Date(a.created_at) - new Date(b.created_at));
-  return [['학번', '이름', '반', '제목', '설명', '교사 피드백', '받은 댓글 수']].concat(posts.map(p => {
+  return [['학번', '이름', '반', '과제', '제목', '설명', '교사 피드백', '받은 댓글 수']].concat(posts.map(p => {
     const cs = S.comments.filter(c => c.post_id === p.id);
-    return [p.student_id, p.name, classOf(p.student_id), p.title, p.description, cs.filter(c => c.role === 'teacher').map(c => c.body).join(' / '), cs.filter(c => c.role === 'student').length];
+    return [p.student_id, p.name, classOf(p.student_id), asgName(p.assignment_id), p.title, p.description, cs.filter(c => c.role === 'teacher').map(c => c.body).join(' / '), cs.filter(c => c.role === 'student').length];
   }));
 }
 $('#csvGo').onclick = () => {
-  const cls = $('#csvClass').value, rows = csvRows(cls);
+  const cls = $('#csvClass').value, aid = $('#csvAsg').value, rows = csvRows(cls, aid);
   if (rows.length < 2) return toast('내보낼 작품이 없어요.');
   const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  saveBlob(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), `작품목록${cls === '전체' ? '_전체' : '(' + cls + ')'}_${stamp}.csv`);
+  saveBlob(new Blob(['\ufeff' + rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), `작품목록${cls === '전체' ? '_전체' : '(' + cls + ')'}${aid === 'all' ? '' : '_' + asgName(aid).replace(/[\\/:*?"<>|]/g, '')}_${stamp}.csv`);
   closeOv($('#csvOv')); toast(`작품 ${rows.length - 1}개를 CSV로 내보냈어요.`);
 };
 
@@ -1177,10 +1260,10 @@ $('#csvGo').onclick = () => {
 let subRoster = [];
 $('#subBtn').onclick = async () => {
   openOv('#subOv'); $('#subBody').innerHTML = '<p class="hint">불러오는 중…</p>';
-  try { subRoster = (await admin('roster_list')).students; await load(); renderSub(); }
+  try { subRoster = (await admin('roster_list')).students; await load(); $('#subAsg').innerHTML = asgOptions(); $('#subAsg').value = S.aid; renderSub(); }
   catch(e){ $('#subBody').innerHTML = `<p class="hint">${esc(errMsg(e))}</p>`; }
 };
-$('#subClass').onchange = $('#subPeriod').onchange = () => renderSub();
+$('#subClass').onchange = $('#subPeriod').onchange = $('#subAsg').onchange = () => renderSub();
 function renderSub(){
   const classes = [...new Set(subRoster.map(r => classOf(r.student_id)))].sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
   const sel = $('#subClass'), cur = sel.value || (S.tab !== '전체' ? S.tab : classes[0]);
@@ -1190,7 +1273,8 @@ function renderSub(){
   const period = $('#subPeriod').value, now = new Date(), today = now.toDateString();
   const inPeriod = p => period === 'all' || (period === 'today' ? new Date(p.created_at).toDateString() === today : now - new Date(p.created_at) < 7 * 86400e3);
   const count = {};
-  S.posts.filter(inPeriod).forEach(p => { count[p.student_id] = (count[p.student_id] || 0) + 1; });
+  const aid = $('#subAsg').value || 'all';
+  S.posts.filter(p => inPeriod(p) && (aid === 'all' || p.assignment_id === aid)).forEach(p => { count[p.student_id] = (count[p.student_id] || 0) + 1; });
   const studs = subRoster.filter(r => classOf(r.student_id) === sel.value);
   const done = studs.filter(r => count[r.student_id]), todo = studs.filter(r => !count[r.student_id]);
   const chip = (r, n) => `<span>${esc(r.student_id)} ${esc(r.name)}${n ? `<span class="cnt">${n}점</span>` : ''}</span>`;
@@ -1224,7 +1308,7 @@ function saveBlob(blob, name){
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 $('#zipBtn').onclick = async () => {
-  const list = S.posts.filter(p => S.tab === '전체' || classOf(p.student_id) === S.tab);
+  const list = S.posts.filter(p => inAsg(p) && (S.tab === '전체' || classOf(p.student_id) === S.tab));
   if (!list.length) return toast('내려받을 작품이 없어요.');
   const b = $('#zipBtn'); b.disabled = true;
   try {
@@ -1266,6 +1350,11 @@ function render(){
   $('#tabs').innerHTML = tabs.map(t => `<button class="story" aria-pressed="${t === S.tab}" data-tab="${esc(t)}">
       <span class="ring"><span>${t === '전체' ? 'ALL' : esc(t)}</span></span>${t === '전체' ? '전체' : esc(t) + '반'}</button>`).join('');
   $('#tabs').querySelectorAll('.story').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
+  // 과제 고르기 (과제가 둘 이상일 때)
+  const bar = $('#asgBar');
+  bar.hidden = S.assign.length <= 1;
+  bar.innerHTML = [{ id: 'all', title: '전체 과제', open: true }, ...S.assign].map(a => `<button data-aid="${a.id}" aria-pressed="${a.id === S.aid}">${esc(a.title)}${a.open ? '' : '<span class="cl"> · 마감</span>'}</button>`).join('');
+  bar.querySelectorAll('[data-aid]').forEach(b => b.onclick = () => { S.aid = b.dataset.aid; store.set('artboard-aid', S.aid); render(); });
   $('#vFeed').setAttribute('aria-pressed', S.view === 'feed');
   $('#vGrid').setAttribute('aria-pressed', S.view === 'grid');
 
@@ -1273,35 +1362,49 @@ function render(){
   renderProg();
   $('#todoBtn').setAttribute('aria-pressed', !!S.todo);
   const hasFb = id => S.comments.some(c => c.post_id === id && c.role === 'teacher');
-  const list = S.posts.filter(p => (S.tab === '전체' || classOf(p.student_id) === S.tab) && !(S.pw && S.todo && hasFb(p.id)));
+  const todo = S.pw && S.todo;
+  const slist = S.posts.filter(p => inAsg(p) && (S.tab === '전체' || classOf(p.student_id) === S.tab) && !(todo && hasFb(p.id)));
+  // 교사 게시물은 모든 반에 보이고, 고정한 게시물이 맨 위에 와요.
+  const list = (todo ? [] : S.tposts.filter(inAsg)).concat(slist)
+    .sort((a, b) => (b.pinned - a.pinned) || new Date(b.created_at) - new Date(a.created_at));
   S.listIds = list.map(p => p.id);
   if (!list.length) {
     wall.className = '';
     wall.innerHTML = `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
-      ${S.pw && S.todo ? '<p class="big">피드백할 작품이 없어요</p><p>이 반 작품에 모두 피드백을 남겼어요.</p></div>' : '<p class="big">아직 올라온 작품이 없어요</p><p>위쪽 ‘올리기’로 첫 작품을 올려 보세요.</p></div>'}`;
+      ${todo ? '<p class="big">피드백할 작품이 없어요</p><p>이 반 작품에 모두 피드백을 남겼어요.</p></div>' : '<p class="big">아직 올라온 작품이 없어요</p><p>위쪽 ‘올리기’로 첫 작품을 올려 보세요.</p></div>'}`;
     return;
   }
   const byPost = id => S.comments.filter(c => c.post_id === id);
+  const showAsg = S.aid === 'all' && S.assign.length > 1;
+  const PIN = '<span class="pin">📌 고정</span>';
   if (S.view === 'grid') {
     wall.className = 'grid';
     wall.innerHTML = list.map(p => {
-      const cs = byPost(p.id), fb = cs.some(c => c.role === 'teacher');
-      return `<button class="g" data-post="${p.id}" aria-label="${esc(p.title)}, ${esc(p.name)}">
+      const t = p.author_role === 'teacher', cs = byPost(p.id), fb = cs.some(c => c.role === 'teacher');
+      if (t && !p.thumb_path) return `<button class="g gt" data-post="${p.id}" aria-label="선생님 공지: ${esc(p.title)}">${p.pinned ? '📌 ' : ''}${esc(p.title)}</button>`;
+      return `<button class="g" data-post="${p.id}" aria-label="${esc(p.title)}, ${t ? '선생님' : esc(p.name)}">
         <img src="${pub(p.thumb_path)}" alt="" loading="lazy">
+        ${p.pinned ? '<span class="pinmark" aria-hidden="true">📌</span>' : ''}
         ${fb ? `<span class="fbmark">${VER}</span>` : ''}
-        <span class="ov">${CMT} ${cs.length}</span></button>`;
+        ${t ? '' : `<span class="ov">${CMT} ${cs.length}</span>`}</button>`;
     }).join('');
   } else {
     wall.className = 'feed';
     wall.innerHTML = list.map(p => {
+      if (p.author_role === 'teacher') return `<article class="post tpost">
+        <div class="ph">${tAv()}<div><b>선생님${VER}</b><small>${showAsg ? esc(asgName(p.assignment_id)) : '예시·공지'}</small></div>${p.pinned ? PIN : ''}</div>
+        ${p.thumb_path ? `<button class="pimg" data-post="${p.id}" aria-label="${esc(p.title)} 크게 보기"><img src="${pub(p.thumb_path)}" alt="${esc(p.title)}" loading="lazy"></button>` : ''}
+        <button class="tnote" data-post="${p.id}"><span class="ttl">${esc(p.title)}</span>${p.description ? `<span class="d">${esc(p.description)}</span>` : ''}</button>
+        <div class="when">${rel(p.created_at)}${p.edited_at ? ' · 수정됨' : ''}</div>
+      </article>`;
       const cs = byPost(p.id), fb = cs.filter(c => c.role === 'teacher');
       const shown = [...fb.slice(-1), ...cs.filter(c => c.role !== 'teacher').slice(fb.length ? -1 : -2)];
       return `<article class="post">
-        <div class="ph">${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반</small></div></div>
+        <div class="ph">${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반${showAsg ? ' · ' + esc(asgName(p.assignment_id)) : ''}</small></div>${p.pinned ? PIN : ''}</div>
         <button class="pimg" data-post="${p.id}" aria-label="${esc(p.title)} 크게 보기"><img src="${pub(p.thumb_path)}" alt="${esc(p.title)}" loading="lazy"></button>
         <div class="pact"><button data-post="${p.id}" aria-label="댓글 보기">${CMT}${cs.length || ''}</button>${fb.length ? `<span class="tag">${VER} 선생님 피드백</span>` : ''}</div>
         <p class="pcap"><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? `<span class="d">${esc(p.description)}</span>` : ''}</p>
-        ${shown.map(c => `<p class="prev"><b>${c.role === 'teacher' ? '선생님' + VER : esc(c.name)}</b>${esc(c.body)}</p>`).join('')}
+        ${shown.map(c => `<p class="prev"><b>${c.role === 'teacher' ? '선생님' + VER : esc(c.name)}</b>${c.visibility === 'private' ? '<span class="lock">🔒 본인만</span> ' : ''}${esc(c.body)}</p>`).join('')}
         ${cs.length > shown.length ? `<button class="more" data-post="${p.id}">댓글 ${cs.length}개 모두 보기</button>` : ''}
         <div class="when">${rel(p.created_at)}${p.edited_at ? ' · 수정됨' : ''}</div>
       </article>`;
@@ -1309,12 +1412,11 @@ function render(){
   }
   wall.querySelectorAll('[data-post]').forEach(b => b.onclick = () => openPost(b.dataset.post));
 }
-
 /* 교사: 반별 피드백 진행 (예: 2-7반 피드백 21/33) */
 function renderProg(){
   if (!S.pw) return;
   const by = {};
-  S.posts.forEach(p => { const c = classOf(p.student_id); by[c] = by[c] || [0, 0]; by[c][1]++; if (S.comments.some(x => x.post_id === p.id && x.role === 'teacher')) by[c][0]++; });
+  S.posts.filter(inAsg).forEach(p => { const c = classOf(p.student_id); by[c] = by[c] || [0, 0]; by[c][1]++; if (S.comments.some(x => x.post_id === p.id && x.role === 'teacher')) by[c][0]++; });
   const cls = Object.keys(by).sort((a, b) => a.localeCompare(b, 'ko', { numeric: true })).filter(c => S.tab === '전체' || c === S.tab);
   $('#prog').innerHTML = cls.length ? cls.map(c => `<span class="${by[c][0] === by[c][1] ? 'full' : ''}">${esc(c)}반 피드백 <b>${by[c][0]}/${by[c][1]}</b></span>`).join('') : '';
 }
@@ -1322,41 +1424,46 @@ $('#todoBtn').onclick = () => { S.todo = !S.todo; render(); toast(S.todo ? '피�
 
 /* ---------- 작품 보기 + 댓글 ---------- */
 function renderDetail(keepDraft){
-  const p = S.posts.find(x => x.id === S.open);
+  const p = findPost(S.open);
   if (!p) { closeOv($('#detailOv')); return; }
   const draft = keepDraft && $('#cText') ? $('#cText').value : '';
   const keepScroll = keepDraft && $('#dscroll') ? $('#dscroll').scrollTop : 0;
+  const tp = p.author_role === 'teacher';
   const cs = S.comments.filter(c => c.post_id === p.id);
-  const mine = S.me && S.me.id === p.student_id && S.me.name === p.name;
+  const mine = !tp && S.me && S.me.id === p.student_id && S.me.name === p.name;
   const acts = [];
-  if (mine) acts.push(`<button class="btn" id="editPost">수정하기</button>`);
-  if (S.pw || mine) acts.push(`<button class="btn" id="dlPost">${S.pw ? '원본 내려받기' : '내 작품 내려받기'}</button>`);
-  if (S.pw || mine) acts.push(`<button class="btn danger" id="delPost">작품 지우기</button>`);
-  const pAv = av(p.student_id + p.name, short(p.name), 'sm');
+  if (S.pw) acts.push(`<button class="btn" id="pinPost">${p.pinned ? '고정 풀기' : '📌 맨 위에 고정'}</button>`);
+  if (mine || (S.pw && tp)) acts.push(`<button class="btn" id="editPost">수정하기</button>`);
+  if ((S.pw || mine) && p.image_path) acts.push(`<button class="btn" id="dlPost">${S.pw ? '원본 내려받기' : '내 작품 내려받기'}</button>`);
+  if (S.pw || mine) acts.push(`<button class="btn danger" id="delPost">${tp ? '게시물 지우기' : '작품 지우기'}</button>`);
+  const who = tp ? `${tAv()}<div><b>선생님${VER}</b><small>${esc(asgName(p.assignment_id))}</small></div>`
+    : `${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반 · ${esc(asgName(p.assignment_id))}</small></div>`;
   const ids = S.listIds || [], idx = ids.indexOf(p.id);
   const navHtml = idx < 0 || ids.length < 2 ? '' : `<button class="nav prev" id="dPrev" aria-label="이전 작품" ${idx === 0 ? 'disabled' : ''}>◀</button><button class="nav next" id="dNext" aria-label="다음 작품" ${idx === ids.length - 1 ? 'disabled' : ''}>▶</button><span class="dcount">${idx + 1} / ${ids.length}</span>`;
-  // 학생은 자기 반 작품에만 댓글을 달 수 있어요 (서버에서도 막아요).
-  const canComment = S.pw || !S.me || classOf(S.me.id) === classOf(p.student_id);
+  // 학생은 자기 반 작품에만 댓글을 달 수 있어요. 선생님 게시물에는 댓글이 없어요 (서버에서도 막아요).
+  const canComment = !tp && (S.pw || !S.me || classOf(S.me.id) === classOf(p.student_id));
+  const footNote = tp ? '선생님이 올린 예시·공지예요.' : '다른 반 작품은 감상만 할 수 있고 댓글은 달 수 없어요.';
+  $('#detail').classList.toggle('noimg', !p.image_path);
   $('#detail').innerHTML = `
     <button class="close" id="dClose" aria-label="닫기">×</button>
-    <div class="dimg">${navHtml}<img src="${pub(p.image_path)}" alt="${esc(p.title)}"></div>
+    <div class="dimg">${navHtml}${p.image_path ? `<img src="${pub(p.image_path)}" alt="${esc(p.title)}">` : ''}</div>
     <div class="dside">
-      <div class="ph">${av(p.student_id + p.name, short(p.name))}<div><b>${esc(p.student_id)} ${esc(p.name)}</b><small>${esc(classOf(p.student_id))}반</small></div></div>
+      <div class="ph">${who}${p.pinned ? '<span class="pin">📌 고정</span>' : ''}</div>
       <div class="dscroll" id="dscroll">
-        <div class="cm">${pAv}<div><p><b>${esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? esc(p.description) : ''}</p><small>${rel(p.created_at)}${p.edited_at ? ' · 수정됨' : ''}</small></div></div>
+        <div class="cm">${tp ? tAv('sm') : av(p.student_id + p.name, short(p.name), 'sm')}<div><p><b>${tp ? '선생님' : esc(p.name)}</b><span class="ttl">${esc(p.title)}</span>${p.description ? esc(p.description) : ''}</p><small>${rel(p.created_at)}${p.edited_at ? ' · 수정됨' : ''}${!p.image_path && ids.length > 1 && idx >= 0 ? ` · ${idx + 1} / ${ids.length}` : ''}</small></div></div>
         ${acts.length ? `<div class="acts">${acts.join('')}</div>` : ''}
-        ${cs.length ? cs.map(c => {
+        ${tp ? '' : cs.length ? cs.map(c => {
           const t = c.role === 'teacher';
           const own = !t && S.me && c.student_id === S.me.id && c.name === S.me.name;
           return `<div class="cm ${t ? 'teacher' : ''}" data-c="${c.id}">${t ? tAv('sm') : av(c.student_id + c.name, short(c.name), 'sm')}
-            <div><div class="bub"><p><b>${t ? '선생님' + VER : esc(c.student_id + ' ' + c.name)}</b>${esc(c.body)}</p></div>
+            <div><div class="bub"><p><b>${t ? '선생님' + VER : esc(c.student_id + ' ' + c.name)}</b>${c.visibility === 'private' ? '<span class="lock">🔒 본인만</span> ' : ''}${esc(c.body)}</p></div>
             <small><span>${rel(c.created_at)}${c.edited_at ? ' · 수정됨' : ''}</span>${S.pw && t ? `<button data-edit="${c.id}">수정</button>` : ''}${(S.pw || own) ? `<button data-del="${c.id}">지우기</button>` : ''}</small></div></div>`;
         }).join('') : `<div class="nocm"><strong>아직 댓글이 없어요</strong>${canComment ? '무엇이 눈에 띄었는지, 어떤 느낌이 드는지 남겨 보세요.' : ''}</div>`}
       </div>
-      ${canComment ? `<div class="dfoot">${S.pw && (S.snippets || []).length ? `<div class="snips" aria-label="피드백 상용구">${S.snippets.map((x, i) => `<button data-snip="${i}" title="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : ''}<div class="cform">${S.pw ? tAv('sm') : S.me ? av(S.me.id + S.me.name, short(S.me.name), 'sm') : ''}
+      ${canComment ? `<div class="dfoot">${S.pw ? `<div class="vis" role="radiogroup" aria-label="피드백 공개 범위"><label><input type="radio" name="vis" value="public" ${S.vis !== 'private' ? 'checked' : ''}> 공개</label><label><input type="radio" name="vis" value="private" ${S.vis === 'private' ? 'checked' : ''}> 🔒 본인만</label></div>` : ''}${S.pw && (S.snippets || []).length ? `<div class="snips" aria-label="피드백 상용구">${S.snippets.map((x, i) => `<button data-snip="${i}" title="${esc(x)}">${esc(x)}</button>`).join('')}</div>` : ''}<div class="cform">${S.pw ? tAv('sm') : S.me ? av(S.me.id + S.me.name, short(S.me.name), 'sm') : ''}
         <textarea id="cText" rows="1" maxlength="500" aria-label="${S.pw ? '피드백 쓰기' : '감상 쓰기'}" placeholder="${S.pw ? '피드백 남기기…' : '감상 남기기…'}"></textarea>
         <button id="cSend">게시</button></div>${S.pw ? `<label class="autonext"><input type="checkbox" id="autoNext" ${store.get('artboard-autonext') ? 'checked' : ''}> 피드백을 남기면 다음 작품으로 넘어가기</label>` : ''}</div>`
-      : `<div class="dfoot"><p class="hint" style="margin:6px 0;text-align:center">다른 반 작품은 감상만 할 수 있고 댓글은 달 수 없어요.</p></div>`}
+      : `<div class="dfoot"><p class="hint" style="margin:6px 0;text-align:center">${footNote}</p></div>`}
     </div>`;
   const ta = $('#cText');
   if (ta) {
@@ -1365,10 +1472,14 @@ function renderDetail(keepDraft){
     ta.oninput = grow; grow();
     $('#cSend').onclick = sendComment;
   }
+  $('#detail').querySelectorAll('input[name="vis"]').forEach(r => r.onchange = () => { S.vis = r.value; });
   $('#dscroll').scrollTop = keepScroll;
   $('#dClose').onclick = () => closeOv($('#detailOv'));
   const dp = $('#delPost'); if (dp) dp.onclick = delPost;
   const ep = $('#editPost'); if (ep) ep.onclick = () => editPost(p);
+  const pp = $('#pinPost'); if (pp) pp.onclick = async () => {
+    try { await admin('set_pinned', { postId: p.id, pinned: !p.pinned }); await load(); renderDetail(true); toast(p.pinned ? '고정을 풀었어요.' : '과제 맨 위에 고정했어요.'); } catch(e){ toast(errMsg(e)); }
+  };
   const dl = $('#dlPost'); if (dl) dl.onclick = async () => { try { saveBlob(await fetchBlob(p.image_path), p.file_name); } catch(e){ toast(errMsg(e)); } };
   $('#detail').querySelectorAll('[data-del]').forEach(b => b.onclick = () => delComment(b.dataset.del));
   $('#detail').querySelectorAll('[data-edit]').forEach(b => b.onclick = () => editComment(b.dataset.edit));
@@ -1396,13 +1507,14 @@ document.addEventListener('keydown', e => {
 });
 function editComment(id){
   const c = S.comments.find(x => x.id === id), box = $(`[data-c="${id}"] .bub`); if (!c || !box) return;
-  box.outerHTML = `<div class="cedit"><textarea id="ceText" maxlength="500" aria-label="피드백 고치기"></textarea><div class="row"><button class="btn" id="ceCancel">취소</button><button class="btn primary" id="ceSave">저장</button></div></div>`;
+  box.outerHTML = `<div class="cedit"><textarea id="ceText" maxlength="500" aria-label="피드백 고치기"></textarea><div class="vis" role="radiogroup" aria-label="공개 범위" style="margin-top:6px"><label><input type="radio" name="cevis" value="public" ${c.visibility !== 'private' ? 'checked' : ''}> 공개</label><label><input type="radio" name="cevis" value="private" ${c.visibility === 'private' ? 'checked' : ''}> 🔒 본인만</label></div><div class="row"><button class="btn" id="ceCancel">취소</button><button class="btn primary" id="ceSave">저장</button></div></div>`;
   $('#ceText').value = c.body; $('#ceText').focus();
   $('#ceCancel').onclick = () => renderDetail(true);
   $('#ceSave').onclick = async () => {
     const body = $('#ceText').value.trim(); if (!body) return toast('피드백 내용을 적어 주세요.');
     $('#ceSave').disabled = true;
-    try { await admin('edit_comment', { commentId: id, body }); await load(); renderDetail(true); toast('피드백을 고쳤어요.'); }
+    const visibility = (document.querySelector('input[name="cevis"]:checked') || {}).value || 'public';
+    try { await admin('edit_comment', { commentId: id, body, visibility }); await load(); renderDetail(true); toast('피드백을 고쳤어요.'); }
     catch(e){ toast(errMsg(e)); if ($('#ceSave')) $('#ceSave').disabled = false; }
   };
 }
@@ -1414,7 +1526,7 @@ async function sendComment(){
   try {
     const ids = S.listIds || [], next = ids[ids.indexOf(S.open) + 1];
     const go = S.pw && $('#autoNext') && $('#autoNext').checked && next;
-    if (S.pw) await admin('teacher_comment', { postId: S.open, body });
+    if (S.pw) await admin('teacher_comment', { postId: S.open, body, visibility: S.vis === 'private' ? 'private' : 'public' });
     else await admin('student_comment', { postId: S.open, body });
     $('#cText').value = ''; await load();
     if (go) { S.open = next; renderDetail(); $('#dscroll').scrollTop = 0; toast('피드백을 남기고 다음 작품으로 넘어왔어요.'); }
@@ -1436,38 +1548,67 @@ async function delPost(){
 const E = { base: null, rot90: null, flat: null, geom: null, rot: 0, angle: 0, pts: null, fp: null, crop: null, sel: null, ratio: 'free', mode: null, drag: null, grid: false, auto: null, adj: { b: 0, c: 0, s: 0, t: 0 } };
 const pv = $('#preview');
 
-function setUpMode(editing){
-  if (!!S.editing !== !!editing || (editing && S.editing !== editing)) { $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; }
-  S.editing = editing || null;
-  $('#upT').textContent = editing ? '작품 수정하기' : '작품 올리기';
-  $('#submitBtn').textContent = editing ? '수정 저장' : '작품 올리기';
+/* 올리기 창 모드: 학생 새 작품 / 학생 작품 수정 / 교사 게시물(새로·수정). 교사 게시물은 사진 없이 공지만 쓸 수도 있어요. */
+function setUpMode(editing, teacher){
+  const key = (teacher ? 't:' : 's:') + (editing || '');
+  if (S.upKey !== key) { $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; } // 다른 모드로 바뀌면 비우고, 같은 모드면 쓰던 내용을 이어 써요
+  S.upKey = key; S.editing = editing || null; S.upTeacher = !!teacher; S.noPhoto = false;
+  $('#upT').textContent = teacher ? (editing ? '선생님 게시물 고치기' : '예시·공지 올리기') : (editing ? '작품 수정하기' : '작품 올리기');
+  $('#submitBtn').textContent = editing ? '수정 저장' : teacher ? '게시하기' : '작품 올리기';
+  $('#inTitleL').textContent = teacher ? '제목' : '작품 제목';
   $('#editNote').hidden = !editing;
+  $('#noPhotoRow').hidden = !teacher;
+  $('#inPinRow').hidden = !teacher || !!editing;
+  // 과제 고르기: 학생은 진행 중인 과제만, 교사는 모든 과제. 수정할 때는 바꿀 수 없어요.
+  const post = editing && findPost(editing);
+  const opts = S.assign.filter(a => teacher || a.open || (post && a.id === post.assignment_id));
+  const sel = $('#inAssign');
+  sel.innerHTML = opts.map(a => `<option value="${a.id}">${esc(a.title)}${a.open ? '' : ' (마감)'}</option>`).join('');
+  sel.value = post ? post.assignment_id : (opts.some(a => a.id === S.aid) ? S.aid : (opts[0] || {}).id || '');
+  sel.disabled = !!editing;
+  S.lastTpl = teacher ? '' : tplOf(sel.value);
+  $('#tplReload').hidden = teacher || !S.lastTpl;
+  return opts.length;
 }
+function setNoPhoto(on){
+  S.noPhoto = on; $('#stepEdit').classList.toggle('nophoto', on); $('#addPhotoRow').hidden = !on;
+  if (on) { E.base = E.rot90 = null; showStep('edit'); }
+}
+$('#inAssign').onchange = () => {
+  // 과제를 바꾸면 그 과제의 글 템플릿으로 (아직 손대지 않았을 때만)
+  const cur = $('#inDesc').value.trim(), next = tplOf($('#inAssign').value);
+  if (!S.upTeacher && (!cur || cur === (S.lastTpl || '').trim())) $('#inDesc').value = next;
+  S.lastTpl = next; $('#tplReload').hidden = S.upTeacher || !next;
+};
 $('#fab').onclick = () => {
   if (!S.me && !S.pw) return openOv('#loginOv');
   if (!S.me) return toast('교사 모드에서는 작품을 올릴 수 없어요. 학생 학번으로 들어와 주세요.');
-  setUpMode(null);
-  if (!$('#inDesc').value.trim() && S.template) $('#inDesc').value = S.template;
-  $('#tplReload').hidden = !S.template;
-  showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
+  if (!setUpMode(null, false)) return toast('지금 올릴 수 있는 과제가 없어요. 선생님께 여쭤보세요.');
+  if (!$('#inDesc').value.trim() && S.lastTpl) $('#inDesc').value = S.lastTpl;
+  setNoPhoto(false); showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
 };
+$('#tpostBtn').onclick = () => {
+  if (!S.assign.length) return toast('먼저 과제를 하나 만들어 주세요.');
+  setUpMode(null, true); setNoPhoto(false); showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
+};
+$('#noPhotoBtn').onclick = () => setNoPhoto(true);
+$('#addPhoto').onclick = () => showStep('pick');
 async function editPost(p){
-  toast('작품을 불러오는 중…');
+  const teacher = p.author_role === 'teacher';
   try {
-    const blob = await fetchBlob(p.image_path);
-    setUpMode(p.id);
+    const blob = p.image_path ? (toast('불러오는 중…'), await fetchBlob(p.image_path)) : null;
+    setUpMode(p.id, teacher);
     $('#inTitle').value = p.title === '무제' ? '' : p.title; $('#inDesc').value = p.description || '';
-    $('#tplReload').hidden = !S.template;
     closeOv($('#detailOv')); openOv('#upOv');
-    loadFile(blob, false);
+    if (blob) { setNoPhoto(false); loadFile(blob, false); } else setNoPhoto(true);
   } catch(e){ toast(errMsg(e)); }
 }
 $('#tplReload').onclick = () => {
-  const cur = $('#inDesc').value.trim();
-  if (cur && cur !== S.template.trim() && !confirm('지금 쓴 설명을 지우고 템플릿을 다시 넣을까요?')) return;
-  $('#inDesc').value = S.template; $('#inDesc').focus();
+  const cur = $('#inDesc').value.trim(), tpl = tplOf($('#inAssign').value);
+  if (cur && cur !== tpl.trim() && !confirm('지금 쓴 설명을 지우고 템플릿을 다시 넣을까요?')) return;
+  $('#inDesc').value = tpl; $('#inDesc').focus();
 };
-function showStep(s){ $('#stepPick').hidden = s !== 'pick'; $('#stepEdit').hidden = s !== 'edit'; $('#pickBackRow').hidden = !(s === 'pick' && E.rot90); }
+function showStep(s){ $('#stepPick').hidden = s !== 'pick'; $('#stepEdit').hidden = s !== 'edit'; $('#pickBackRow').hidden = !(s === 'pick' && (E.rot90 || S.noPhoto)); }
 ['#camIn', '#fileIn'].forEach(sel => $(sel).onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) loadFile(f, true); });
 $('#repick').onclick = () => showStep('pick');
 $('#pickBack').onclick = () => showStep('edit');
@@ -1480,7 +1621,7 @@ function loadFile(file, fresh = true){
     c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
-    E.base = c; E.rot = 0; E.fresh = fresh; resetEdits(); showStep('edit');
+    E.base = c; E.rot = 0; E.fresh = fresh; setNoPhoto(false); resetEdits(); showStep('edit');
   };
   img.onerror = () => { URL.revokeObjectURL(url); toast('이 사진 형식은 열 수 없어요. JPG나 PNG 사진으로 골라 주세요.'); };
   img.src = url;
@@ -1846,19 +1987,24 @@ pv.addEventListener('pointermove', e => {
 /* 올리기 */
 const toBlob = (c, q) => new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('사진을 만들지 못했어요.')), 'image/jpeg', q));
 $('#submitBtn').onclick = async () => {
-  if (!E.rot90) return toast('사진을 먼저 골라 주세요.');
-  if (E.mode) return toast(E.mode === 'crop' ? '자르기를 적용하거나 취소해 주세요.' : '펴기를 적용하거나 취소해 주세요.');
-  if (S.template && $('#inDesc').value.trim() === S.template.trim()) { $('#inDesc').focus(); return toast('작품 설명 템플릿의 빈칸을 채워 주세요.'); }
-  const editing = S.editing, label = $('#submitBtn').textContent;
+  const teacher = S.upTeacher, editing = S.editing, noPhoto = teacher && S.noPhoto;
+  if (!noPhoto && !E.rot90) return toast('사진을 먼저 골라 주세요.');
+  if (!noPhoto && E.mode) return toast(E.mode === 'crop' ? '자르기를 적용하거나 취소해 주세요.' : '펴기를 적용하거나 취소해 주세요.');
+  const aid = $('#inAssign').value; if (!aid) return toast('과제를 골라 주세요.');
+  const tpl = tplOf(aid);
+  if (!teacher && !editing && tpl && $('#inDesc').value.trim() === tpl.trim()) { $('#inDesc').focus(); return toast('작품 설명 템플릿의 빈칸을 채워 주세요.'); }
+  if (teacher && !$('#inTitle').value.trim()) { $('#inTitle').focus(); return toast('제목을 적어 주세요.'); }
+  if (noPhoto && !$('#inDesc').value.trim()) { $('#inDesc').focus(); return toast('공지 내용을 적어 주세요.'); }
+  const label = $('#submitBtn').textContent;
   const b = $('#submitBtn'); b.disabled = true; b.textContent = editing ? '저장하는 중…' : '올리는 중…';
   try {
     const fields = { title: $('#inTitle').value.trim().slice(0, 60) || '무제', description: $('#inDesc').value.trim().slice(0, 1000) };
     // 수정할 때 사진을 손대지 않았으면 사진은 다시 올리지 않아요.
-    const photoChanged = !editing || E.fresh || E.rot || E.angle || E.flat || E.crop || edited();
+    const photoChanged = !noPhoto && (!editing || E.fresh || E.rot || E.angle || E.flat || E.crop || edited());
     if (photoChanged) {
       const full = await toBlob(renderOut(2000, true), 0.88);
       const thumb = await toBlob(renderOut(700, true), 0.82);
-      const u = await admin('upload_urls');
+      const u = await admin('upload_urls', { asTeacher: teacher });
       for (const [slot, blob] of [[u.full, full], [u.thumb, thumb]]) {
         const { error } = await sb.storage.from(BUCKET).uploadToSignedUrl(slot.path, slot.token, blob, { contentType: 'image/jpeg' });
         if (error) throw new Error('사진을 올리지 못했어요. 인터넷 연결을 확인해 주세요.');
@@ -1866,10 +2012,15 @@ $('#submitBtn').onclick = async () => {
       fields.image_path = u.full.path; fields.thumb_path = u.thumb.path;
     }
     if (editing) await admin('update_post', { postId: editing, ...fields });
-    else await admin('create_post', fields);
-    $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; S.editing = null;
-    closeOv($('#upOv')); S.tab = classOf(S.me.id); await load();
-    if (editing) { toast('작품을 고쳤어요.'); openPost(editing); }
+    else if (teacher) await admin('create_teacher_post', { assignmentId: aid, pinned: $('#inPinned').checked, ...fields });
+    else await admin('create_post', { assignmentId: aid, ...fields });
+    $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; S.editing = null; S.upKey = null; setNoPhoto(false);
+    closeOv($('#upOv'));
+    if (!teacher) S.tab = classOf(S.me.id);
+    if (S.aid !== 'all' && S.aid !== aid) { S.aid = aid; store.set('artboard-aid', aid); }
+    await load();
+    if (editing) { toast(teacher ? '게시물을 고쳤어요.' : '작품을 고쳤어요.'); openPost(editing); }
+    else if (teacher) toast('예시·공지를 올렸어요.');
     else afterUpload();
   } catch(e){ toast(errMsg(e)); }
   b.disabled = false; b.textContent = label;

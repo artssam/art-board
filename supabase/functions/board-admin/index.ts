@@ -49,7 +49,7 @@ async function me(token: unknown) {
   return { sid: data.student_id as string, name: (data as any).board_students?.name as string };
 }
 async function checkUpload(sid: string, image: unknown, thumb: unknown) {
-  const m = /^(\d{4,6})\/([0-9a-f-]{36})\.jpg$/.exec(String(image ?? ""));
+  const m = /^(\d{4,6}|teacher)\/([0-9a-f-]{36})\.jpg$/.exec(String(image ?? ""));
   if (!m || m[1] !== sid || thumb !== `${sid}/${m[2]}_t.jpg`) throw new Fail("사진 정보가 올바르지 않아요.");
   const { data: files } = await db.storage.from(BUCKET).list(sid, { search: m[2] });
   if (!files || files.length < 2) throw new Fail("사진이 다 올라가지 않았어요. 다시 올려 주세요.");
@@ -59,6 +59,13 @@ async function config(key: string) {
   return data?.value ?? "";
 }
 const FLAGS = ["cross_class_view", "shared_device"];
+const cut = (v: unknown, n: number) => String(v ?? "").replace(/\r\n/g, "\n").trim().slice(0, n);
+async function openAssignment(id: unknown, mustBeOpen: boolean) {
+  const { data } = await db.from("board_assignments").select("id, open").eq("id", String(id ?? "")).maybeSingle();
+  if (!data) throw new Fail("과제를 골라 주세요.");
+  if (mustBeOpen && !data.open) throw new Fail("마감된 과제예요. 진행 중인 과제를 골라 주세요.");
+  return data.id as string;
+}
 function checkPin(pin: string) {
   if (!/^\d{4,6}$/.test(pin)) throw new Fail("PIN은 숫자 4~6자리로 정해 주세요.");
 }
@@ -73,32 +80,41 @@ Deno.serve(async (req) => {
     switch (b.action) {
       case "feed": {
         // 작품·댓글은 이 요청으로만 내려가요. 교사는 전부, 학생은 자기 반(허용되면 전체), 로그인 전에는 없음.
-        const [pr, cr, gr] = await Promise.all([
+        const [pr, cr, gr, ar] = await Promise.all([
           db.from("board_posts").select("*").order("created_at", { ascending: false }),
           db.from("board_comments").select("*").order("created_at"),
           db.from("board_config").select("key, value"),
+          db.from("board_assignments").select("*").order("created_at"),
         ]);
         if (pr.error || cr.error) throw new Fail("게시판을 불러오지 못했어요. 잠시 뒤 다시 해 주세요.");
         const posts = pr.data ?? [], comments = cr.data ?? [];
         const cfg = (k: string) => (gr.data ?? []).find((r) => r.key === k)?.value ?? "";
         const crossClass = cfg("cross_class_view") === "1";
-        let visible: typeof posts = [];
+        let visible: typeof posts = [], viewer = "";
         if (teacher) visible = posts;
         else if (b.token) {
           const u = await me(b.token);
           const mine = classOf(u.sid);
-          visible = crossClass ? posts : posts.filter((p) => classOf(p.student_id) === mine);
+          viewer = u.sid;
+          // 교사 게시물(예시·공지)은 모든 반에 보이고, 학생 작품은 자기 반만 (교사가 허용하면 전체).
+          visible = posts.filter((p) => p.author_role === "teacher" || crossClass || classOf(p.student_id) === mine);
         }
-        const ids = new Set(visible.map((p) => p.id));
+        const byId = new Map(visible.map((p) => [p.id, p]));
+        // 본인만 피드백: 교사와 그 작품의 주인에게만 내려가요.
+        const shown = comments.filter((c) => {
+          const p = byId.get(c.post_id);
+          if (!p) return false;
+          return c.visibility !== "private" || teacher || (viewer !== "" && p.student_id === viewer);
+        });
         return json({
           posts: visible,
-          comments: comments.filter((c) => ids.has(c.post_id)),
-          template: cfg("post_template"),
+          comments: shown,
+          assignments: teacher || viewer ? (ar.data ?? []) : [],
           crossClass,
           sharedDevice: cfg("shared_device") === "1",
           snippets: teacher ? (() => { try { return JSON.parse(cfg("feedback_snippets") || "[]"); } catch { return []; } })() : [],
           // 로그인 첫 화면 배경: 다른 반 보기가 켜져 있을 때만 작품 썸네일을 보여 줘요.
-          mosaic: crossClass ? posts.slice(0, 14).map((p) => p.thumb_path) : [],
+          mosaic: crossClass ? posts.filter((p) => p.author_role === "student").slice(0, 14).map((p) => p.thumb_path) : [],
         });
       }
 
@@ -136,10 +152,10 @@ Deno.serve(async (req) => {
       }
 
       case "upload_urls": {
-        const u = await me(b.token);
+        const dir = b.asTeacher ? (needTeacher(), "teacher") : (await me(b.token)).sid;
         const id = crypto.randomUUID();
         const out: Record<string, { path: string; token: string }> = {};
-        for (const [k, path] of [["full", `${u.sid}/${id}.jpg`], ["thumb", `${u.sid}/${id}_t.jpg`]]) {
+        for (const [k, path] of [["full", `${dir}/${id}.jpg`], ["thumb", `${dir}/${id}_t.jpg`]]) {
           const { data, error } = await db.storage.from(BUCKET).createSignedUploadUrl(path);
           if (error || !data) throw new Fail("사진 올릴 준비를 하지 못했어요. 다시 해 주세요.");
           out[k] = { path, token: data.token };
@@ -148,9 +164,10 @@ Deno.serve(async (req) => {
       }
       case "create_post": {
         const u = await me(b.token);
+        const assignment_id = await openAssignment(b.assignmentId, true);
         await checkUpload(u.sid, b.image_path, b.thumb_path);
         const { error } = await db.from("board_posts").insert({
-          student_id: u.sid, name: u.name,
+          student_id: u.sid, name: u.name, assignment_id,
           title: String(b.title ?? "").trim().slice(0, 60) || "무제",
           description: String(b.description ?? "").trim().slice(0, 1000),
           image_path: b.image_path, thumb_path: b.thumb_path,
@@ -161,10 +178,11 @@ Deno.serve(async (req) => {
 
       case "update_post": {
         // 내 작품의 제목·설명을 고치고, 원하면 사진도 바꿔요. 받은 댓글·피드백은 그대로 남아요.
-        const u = await me(b.token);
         const { data: p } = await db.from("board_posts").select("*").eq("id", b.postId).maybeSingle();
         if (!p) throw new Fail("지워진 작품이에요.");
-        if (p.student_id !== u.sid) throw new Fail("내 작품만 고칠 수 있어요.");
+        let dir: string;
+        if (p.author_role === "teacher") { needTeacher(); dir = "teacher"; }
+        else { const u = await me(b.token); if (p.student_id !== u.sid) throw new Fail("내 작품만 고칠 수 있어요."); dir = u.sid; }
         const patch: Record<string, unknown> = {
           title: String(b.title ?? "").trim().slice(0, 60) || "무제",
           description: String(b.description ?? "").trim().slice(0, 1000),
@@ -172,9 +190,9 @@ Deno.serve(async (req) => {
         };
         let old: string[] = [];
         if (b.image_path) {
-          await checkUpload(u.sid, b.image_path, b.thumb_path);
+          await checkUpload(dir, b.image_path, b.thumb_path);
           patch.image_path = b.image_path; patch.thumb_path = b.thumb_path;
-          old = [p.image_path, p.thumb_path];
+          old = [p.image_path, p.thumb_path].filter(Boolean);
         }
         const { error } = await db.from("board_posts").update(patch).eq("id", p.id);
         if (error) throw new Fail("작품을 고치지 못했어요.");
@@ -182,12 +200,32 @@ Deno.serve(async (req) => {
         return json({ ok: true });
       }
 
+      case "create_teacher_post": {
+        needTeacher();
+        const assignment_id = await openAssignment(b.assignmentId, false);
+        const title = cut(b.title, 60), description = cut(b.description, 1000);
+        if (!title) throw new Fail("제목을 적어 주세요.");
+        const row: Record<string, unknown> = { author_role: "teacher", assignment_id, title, description, pinned: b.pinned !== false };
+        if (b.image_path) { await checkUpload("teacher", b.image_path, b.thumb_path); row.image_path = b.image_path; row.thumb_path = b.thumb_path; }
+        else if (!description) throw new Fail("공지 내용을 적어 주세요.");
+        const { error } = await db.from("board_posts").insert(row);
+        if (error) throw new Fail("게시물을 저장하지 못했어요.");
+        return json({ ok: true });
+      }
+      case "set_pinned": {
+        needTeacher();
+        const { error } = await db.from("board_posts").update({ pinned: !!b.pinned }).eq("id", b.postId);
+        if (error) throw new Fail("고정을 바꾸지 못했어요.");
+        return json({ ok: true });
+      }
+
       case "student_comment": {
         const u = await me(b.token);
         const body = String(b.body ?? "").trim().slice(0, 500);
         if (!body) throw new Fail("댓글 내용을 적어 주세요.");
-        const { data: p } = await db.from("board_posts").select("student_id").eq("id", b.postId).maybeSingle();
+        const { data: p } = await db.from("board_posts").select("student_id, author_role").eq("id", b.postId).maybeSingle();
         if (!p) throw new Fail("지워진 작품이에요.");
+        if (p.author_role === "teacher") throw new Fail("선생님 게시물에는 댓글을 달 수 없어요.");
         if (classOf(p.student_id) !== classOf(u.sid)) throw new Fail("다른 반 작품에는 댓글을 달 수 없어요.");
         const { error } = await db.from("board_comments").insert({ post_id: b.postId, role: "student", student_id: u.sid, name: u.name, body });
         if (error) throw new Fail("지워진 작품이에요.");
@@ -197,7 +235,8 @@ Deno.serve(async (req) => {
         needTeacher();
         const body = String(b.body ?? "").trim().slice(0, 500);
         if (!body) throw new Fail("피드백 내용을 적어 주세요.");
-        const { error } = await db.from("board_comments").insert({ post_id: b.postId, role: "teacher", body });
+        const visibility = b.visibility === "private" ? "private" : "public";
+        const { error } = await db.from("board_comments").insert({ post_id: b.postId, role: "teacher", body, visibility });
         if (error) throw new Fail("지워진 작품이에요.");
         return json({ ok: true });
       }
@@ -209,7 +248,9 @@ Deno.serve(async (req) => {
         if (c.role !== "teacher") throw new Fail("선생님 피드백만 고칠 수 있어요.");
         const body = String(b.body ?? "").trim().slice(0, 500);
         if (!body) throw new Fail("피드백 내용을 적어 주세요.");
-        const { error } = await db.from("board_comments").update({ body, edited_at: new Date().toISOString() }).eq("id", c.id);
+        const patch: Record<string, unknown> = { body, edited_at: new Date().toISOString() };
+        if (b.visibility === "private" || b.visibility === "public") patch.visibility = b.visibility;
+        const { error } = await db.from("board_comments").update(patch).eq("id", c.id);
         if (error) throw new Fail("피드백을 고치지 못했어요.");
         return json({ ok: true });
       }
@@ -225,7 +266,8 @@ Deno.serve(async (req) => {
         const { data: p } = await db.from("board_posts").select("*").eq("id", b.postId).maybeSingle();
         if (!p) throw new Fail("이미 지워진 작품이에요.");
         if (!teacher) { const u = await me(b.token); if (u.sid !== p.student_id) throw new Fail("내 작품만 지울 수 있어요."); }
-        await db.storage.from(BUCKET).remove([p.image_path, p.thumb_path]);
+        const files = [p.image_path, p.thumb_path].filter(Boolean);
+        if (files.length) await db.storage.from(BUCKET).remove(files);
         await db.from("board_posts").delete().eq("id", p.id);
         return json({ ok: true });
       }
@@ -278,12 +320,6 @@ Deno.serve(async (req) => {
         await db.from("board_teacher_sessions").delete().neq("token_hash", await sha256(String(b.tt)));
         return json({ ok: true });
       }
-      case "set_cross_class": {
-        needTeacher();
-        const { error } = await db.from("board_config").upsert({ key: "cross_class_view", value: b.on ? "1" : "0", updated_at: new Date().toISOString() });
-        if (error) throw new Fail("설정을 바꾸지 못했어요.");
-        return json({ ok: true });
-      }
       case "set_flag": {
         needTeacher();
         if (!FLAGS.includes(b.key)) throw new Fail("알 수 없는 설정이에요.");
@@ -291,11 +327,23 @@ Deno.serve(async (req) => {
         if (error) throw new Fail("설정을 바꾸지 못했어요.");
         return json({ ok: true });
       }
-      case "set_template": {
+      case "save_assignment": {
         needTeacher();
-        const value = String(b.template ?? "").replace(/\r\n/g, "\n").slice(0, 600);
-        const { error } = await db.from("board_config").upsert({ key: "post_template", value, updated_at: new Date().toISOString() });
-        if (error) throw new Fail("템플릿을 저장하지 못했어요.");
+        const row = { title: cut(b.title, 40), template: cut(b.template, 600), open: b.open !== false };
+        if (!row.title) throw new Fail("과제 이름을 적어 주세요.");
+        const q = b.id ? db.from("board_assignments").update(row).eq("id", b.id) : db.from("board_assignments").insert(row);
+        const { error } = await q;
+        if (error) throw new Fail("과제를 저장하지 못했어요.");
+        return json({ ok: true });
+      }
+      case "delete_assignment": {
+        needTeacher();
+        const { count } = await db.from("board_posts").select("id", { count: "exact", head: true }).eq("assignment_id", b.id);
+        if (count) throw new Fail(`이 과제에 게시물이 ${count}개 있어서 지울 수 없어요. 마감으로 바꿔 주세요.`);
+        const { count: left } = await db.from("board_assignments").select("id", { count: "exact", head: true });
+        if ((left ?? 0) <= 1) throw new Fail("과제는 하나 이상 있어야 해요.");
+        const { error } = await db.from("board_assignments").delete().eq("id", b.id);
+        if (error) throw new Fail("과제를 지우지 못했어요.");
         return json({ ok: true });
       }
       case "roster_list": {
