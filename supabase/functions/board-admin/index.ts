@@ -329,7 +329,8 @@ Deno.serve(async (req) => {
       }
       case "save_assignment": {
         needTeacher();
-        const row = { title: cut(b.title, 40), template: cut(b.template, 600), open: b.open !== false };
+        // 템플릿은 끝의 빈칸('■ 작품 의도: ')을 지키려고 앞뒤 공백을 자르지 않아요.
+        const row = { title: cut(b.title, 40), template: String(b.template ?? "").replace(/\r\n/g, "\n").slice(0, 600), open: b.open !== false };
         if (!row.title) throw new Fail("과제 이름을 적어 주세요.");
         const q = b.id ? db.from("board_assignments").update(row).eq("id", b.id) : db.from("board_assignments").insert(row);
         const { error } = await q;
