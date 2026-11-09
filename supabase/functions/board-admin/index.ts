@@ -113,12 +113,11 @@ Deno.serve(async (req) => {
         await db.from("board_students").update({ fail_count: 0, locked_until: null }).eq("student_id", sid);
         await db.from("board_sessions").delete().lt("expires_at", new Date().toISOString());
         const token = randHex(32);
-        const keep = (await config("shared_device")) === "1" ? 12 * 3600e3 : 60 * 86400e3;
-        await db.from("board_sessions").insert({
-          token_hash: await sha256(token), student_id: sid,
-          expires_at: new Date(Date.now() + keep).toISOString(),
-        });
-        return json({ token, studentId: sid, name: st.name, mustChange: !!st.must_change });
+        // 공용 기기 모드면 2시간, 아니면 60일 동안 로그인이 유지돼요.
+        const keep = (await config("shared_device")) === "1" ? 2 * 3600e3 : 60 * 86400e3;
+        const expiresAt = new Date(Date.now() + keep).toISOString();
+        await db.from("board_sessions").insert({ token_hash: await sha256(token), student_id: sid, expires_at: expiresAt });
+        return json({ token, studentId: sid, name: st.name, mustChange: !!st.must_change, expiresAt });
       }
       case "set_pin": {
         const u = await me(b.token);

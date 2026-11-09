@@ -144,7 +144,13 @@ textarea.f{resize:vertical;min-height:72px}
 .tools .btn[aria-pressed="true"]{background:var(--text);color:var(--bg)}
 .sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:4px 18px;margin-top:10px}
 .sl{display:grid;grid-template-columns:52px 1fr 32px;align-items:center;gap:8px;font-size:13px;font-weight:600}
-.sl input{width:100%;height:36px;margin:0;accent-color:var(--blue)}
+.sl input{width:100%;height:44px;margin:0;accent-color:var(--blue)}
+/* 슬라이더 손잡이: 누르는 영역 44px, 보이는 동그라미는 26px */
+.sl input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+.sl input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line)}
+.sl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;margin-top:-19px;border:0;border-radius:50%;background:radial-gradient(circle,var(--blue) 0 10px,#fff 10.5px 13px,rgba(0,0,0,.18) 13.5px 14.5px,transparent 15px)}
+.sl input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+.sl input[type=range]::-moz-range-thumb{width:44px;height:44px;border:0;border-radius:50%;background:radial-gradient(circle,var(--blue) 0 10px,#fff 10.5px 13px,rgba(0,0,0,.18) 13.5px 14.5px,transparent 15px)}
 .sl output{text-align:right;color:var(--muted);font-weight:400}
 .modebar{display:none;background:var(--soft);padding:10px;border-radius:10px;margin-top:10px;font-size:13px}
 .modebar.on{display:block}
@@ -153,8 +159,8 @@ textarea.f{resize:vertical;min-height:72px}
 .ratios{display:flex;gap:6px;flex-wrap:wrap}
 .ratios .btn{padding:10px 12px;font-size:13px;border-radius:999px;background:var(--card)}
 .ratios .btn[aria-pressed="true"]{background:var(--text);color:var(--bg)}
-.sl.rot{grid-template-columns:52px 40px 1fr 40px 44px;grid-column:1/-1}
-.sl .step{width:40px;height:40px;border-radius:50%;background:var(--soft);font-weight:800;font-size:18px;line-height:1}
+.sl.rot{grid-template-columns:48px 44px 1fr 44px 44px;grid-column:1/-1}
+.sl .step{width:44px;height:44px;border-radius:50%;background:var(--soft);font-weight:800;font-size:18px;line-height:1}
 #upOv .sheet h2{margin-bottom:0}
 
 /* 작품 상세 */
@@ -203,7 +209,7 @@ textarea.f{resize:vertical;min-height:72px}
 
 /* 로그인한 학생 표시 + 로그아웃 */
 .sub b{color:var(--text)}
-.sub .out{color:var(--blue);font-weight:700;padding:10px 4px;margin:-10px 0}
+.sub .out{color:var(--blue);font-weight:700;display:inline-flex;align-items:center;min-height:44px;padding:0 6px;margin:-12px 0;vertical-align:middle}
 
 /* 설정 스위치 */
 .setrow{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
@@ -575,7 +581,7 @@ textarea.f{resize:vertical;min-height:72px}
     <button class="close" data-close aria-label="닫기">×</button>
     <h2 id="setT">게시판 설정</h2>
     <div class="setrow"><div><b>다른 반 작품 보기</b><p class="hint">켜면 학생들이 다른 반 작품도 볼 수 있어요. 댓글은 자기 반 작품에만 달 수 있어요.</p></div><button class="tgl" id="ccTgl" role="switch" aria-checked="false" aria-label="다른 반 작품 보기"></button></div>
-    <div class="setrow"><div><b>공용 기기 모드</b><p class="hint">교실 태블릿처럼 한 기기를 여럿이 돌려 쓸 때 켜요. 10분 동안 아무것도 안 하면 자동으로 로그아웃되고, 작품을 올린 뒤 로그아웃을 권해요.</p></div><button class="tgl" id="sdTgl" role="switch" aria-checked="false" aria-label="공용 기기 모드"></button></div>
+    <div class="setrow"><div><b>공용 기기 모드</b><p class="hint">교실 태블릿처럼 한 기기를 여럿이 돌려 쓸 때 켜요. 켠 뒤 로그인한 학생은 2시간이 지나면 자동으로 로그아웃되고, 작품을 올린 뒤 로그아웃을 크게 권해요.</p></div><button class="tgl" id="sdTgl" role="switch" aria-checked="false" aria-label="공용 기기 모드"></button></div>
     <div class="row"><button class="btn" id="pwBtn" style="flex:1">교사 비밀번호 바꾸기</button></div>
   </div>
 </div>
@@ -810,13 +816,9 @@ async function doLogout(){
   logoutLocal(); openOv('#loginOv'); load();
   if (tok) admin('logout', { token: tok }).catch(() => {});
 }
-/* 공용 기기 모드: 10분 동안 아무것도 안 하면 자동 로그아웃 */
-const IDLE_MS = 10 * 60 * 1000;
-let lastAct = store.get('artboard-last') || Date.now();
-const touchAct = () => { lastAct = Date.now(); store.set('artboard-last', lastAct); };
-['pointerdown', 'keydown', 'scroll'].forEach(ev => window.addEventListener(ev, touchAct, { passive: true, capture: true }));
+/* 로그인 만료: 공용 기기 모드면 서버가 2시간짜리 로그인을 줘요. 시간이 지나면 이 기기에서도 바로 로그아웃해요. */
 function checkIdle(){
-  if (S.shared && S.me && !S.pw && Date.now() - lastAct > IDLE_MS) { doLogout(); toast('한동안 쓰지 않아서 자동으로 로그아웃했어요.'); }
+  if (S.me && S.me.exp && Date.now() > new Date(S.me.exp).getTime()) { doLogout(); toast('로그인 시간이 끝나서 자동으로 로그아웃했어요. 다시 들어와 주세요.'); }
 }
 setInterval(checkIdle, 20000);
 function clearData(){ S.posts = []; S.comments = []; S.sig = ''; }
@@ -825,7 +827,7 @@ function logoutLocal(){
   $('#stepLogin').hidden = false; $('#stepNewPin').hidden = true; $('#inPin').value = '';
 }
 let pendingMe = null;
-function enterBoard(){ touchAct(); S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); load(); }
+function enterBoard(){ S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); load(); }
 $('#loginGo').onclick = async () => {
   const id = $('#inId').value.replace(/\s/g,''), name = $('#inName').value.replace(/\s/g,''), pin = $('#inPin').value.trim();
   if (!/^\d{4,6}$/.test(id)) return toast('학번은 숫자 4~6자리로 적어 주세요.');
@@ -834,7 +836,7 @@ $('#loginGo').onclick = async () => {
   const b = $('#loginGo'); b.disabled = true;
   try {
     const r = await admin('student_login', { studentId: id, name, pin });
-    pendingMe = { id: r.studentId, name: r.name, token: r.token };
+    pendingMe = { id: r.studentId, name: r.name, token: r.token, exp: r.expiresAt };
     $('#inPin').value = '';
     if (r.mustChange) { $('#stepLogin').hidden = true; $('#stepNewPin').hidden = false; setTimeout(() => $('#newPin1').focus(), 50); }
     else enterBoard();
@@ -989,7 +991,7 @@ $('#ccTgl').onclick = () => { const next = !S.crossClass; setFlag($('#ccTgl'), '
   next ? '학생들이 다른 반 작품도 볼 수 있게 할까요? (댓글은 자기 반 작품에만 달 수 있어요)' : '학생들이 자기 반 작품만 보게 할까요?',
   next ? '이제 학생들이 다른 반 작품도 볼 수 있어요.' : '이제 학생들은 자기 반 작품만 볼 수 있어요.'); };
 $('#sdTgl').onclick = () => { const next = !S.shared; setFlag($('#sdTgl'), 'shared_device', next,
-  next ? '공용 기기 모드를 켤까요? 10분 동안 쓰지 않으면 자동 로그아웃되고, 새로 로그인하면 12시간 뒤 다시 로그인해야 해요.' : '공용 기기 모드를 끌까요? 학생 로그인이 60일 동안 유지돼요.',
+  next ? '공용 기기 모드를 켤까요? 지금부터 로그인하는 학생은 2시간 뒤 자동으로 로그아웃돼요.' : '공용 기기 모드를 끌까요? 지금부터 로그인하는 학생은 60일 동안 로그인이 유지돼요.',
   next ? '공용 기기 모드를 켰어요.' : '공용 기기 모드를 껐어요.'); };
 
 /* 제출 현황 */
