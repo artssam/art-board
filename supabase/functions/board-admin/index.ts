@@ -32,10 +32,13 @@ async function setting(key: string) {
   return data?.value ?? "";
 }
 const pinHash = async (sid: string, pin: string) => sha256((await setting("pin_pepper")) + ":" + sid + ":" + pin);
-async function isTeacher(pw: unknown) {
-  if (!pw) return false;
-  return (await setting("teacher_pw_sha256")) === (await sha256(String(pw)));
+// 교사 확인: 비밀번호가 아니라 teacher_login이 발급한 세션 토큰(tt)으로 해요.
+async function isTeacher(tt: unknown) {
+  if (!tt) return false;
+  const { data } = await db.from("board_teacher_sessions").select("expires_at").eq("token_hash", await sha256(String(tt))).maybeSingle();
+  return !!data && new Date(data.expires_at) > new Date();
 }
+const setSetting = (key: string, value: string) => db.from("board_settings").upsert({ key, value });
 async function me(token: unknown) {
   if (!token) throw new Fail("다시 로그인해 주세요.", "auth");
   const { data } = await db.from("board_sessions")
@@ -64,8 +67,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
     const b = await req.json();
-    const teacher = await isTeacher(b.pw);
-    const needTeacher = () => { if (!teacher) throw new Fail("교사 비밀번호가 맞지 않아요.", "teacher"); };
+    const teacher = await isTeacher(b.tt);
+    const needTeacher = () => { if (!teacher) throw new Fail("교사 로그인이 끝났어요. 다시 들어와 주세요.", "teacher"); };
 
     switch (b.action) {
       case "feed": {
@@ -93,6 +96,7 @@ Deno.serve(async (req) => {
           template: cfg("post_template"),
           crossClass,
           sharedDevice: cfg("shared_device") === "1",
+          snippets: teacher ? (() => { try { return JSON.parse(cfg("feedback_snippets") || "[]"); } catch { return []; } })() : [],
           // 로그인 첫 화면 배경: 다른 반 보기가 켜져 있을 때만 작품 썸네일을 보여 줘요.
           mosaic: crossClass ? posts.slice(0, 14).map((p) => p.thumb_path) : [],
         });
@@ -198,6 +202,25 @@ Deno.serve(async (req) => {
         return json({ ok: true });
       }
 
+      case "edit_comment": {
+        needTeacher();
+        const { data: c } = await db.from("board_comments").select("id, role").eq("id", b.commentId).maybeSingle();
+        if (!c) throw new Fail("지워진 피드백이에요.");
+        if (c.role !== "teacher") throw new Fail("선생님 피드백만 고칠 수 있어요.");
+        const body = String(b.body ?? "").trim().slice(0, 500);
+        if (!body) throw new Fail("피드백 내용을 적어 주세요.");
+        const { error } = await db.from("board_comments").update({ body, edited_at: new Date().toISOString() }).eq("id", c.id);
+        if (error) throw new Fail("피드백을 고치지 못했어요.");
+        return json({ ok: true });
+      }
+      case "set_snippets": {
+        needTeacher();
+        const list = (Array.isArray(b.list) ? b.list : []).map((x: unknown) => String(x ?? "").trim().slice(0, 200)).filter(Boolean).slice(0, 50);
+        const { error } = await db.from("board_config").upsert({ key: "feedback_snippets", value: JSON.stringify(list), updated_at: new Date().toISOString() });
+        if (error) throw new Fail("상용구를 저장하지 못했어요.");
+        return json({ ok: true, list });
+      }
+
       case "delete_post": {
         const { data: p } = await db.from("board_posts").select("*").eq("id", b.postId).maybeSingle();
         if (!p) throw new Fail("이미 지워진 작품이에요.");
@@ -217,12 +240,42 @@ Deno.serve(async (req) => {
         return json({ ok: true });
       }
 
+      case "teacher_login": {
+        const until = await setting("teacher_locked_until");
+        if (until && new Date(until) > new Date()) {
+          const min = Math.ceil((new Date(until).getTime() - Date.now()) / 60e3);
+          throw new Fail(`비밀번호를 5번 틀려서 잠겼어요. ${min}분 뒤에 다시 해 주세요.`);
+        }
+        if ((await setting("teacher_pw_sha256")) !== (await sha256(String(b.pw ?? "")))) {
+          const fc = (parseInt(await setting("teacher_fail_count"), 10) || 0) + 1;
+          if (fc >= 5) {
+            await setSetting("teacher_fail_count", "0");
+            await setSetting("teacher_locked_until", new Date(Date.now() + 10 * 60e3).toISOString());
+            throw new Fail("비밀번호를 5번 틀려서 10분 동안 잠겼어요.");
+          }
+          await setSetting("teacher_fail_count", String(fc));
+          throw new Fail(`교사 비밀번호가 맞지 않아요. (${fc}/5)`);
+        }
+        await setSetting("teacher_fail_count", "0");
+        await setSetting("teacher_locked_until", "");
+        await db.from("board_teacher_sessions").delete().lt("expires_at", new Date().toISOString());
+        const tt = randHex(32);
+        const expiresAt = new Date(Date.now() + (b.keep ? 7 * 86400e3 : 12 * 3600e3)).toISOString();
+        await db.from("board_teacher_sessions").insert({ token_hash: await sha256(tt), expires_at: expiresAt });
+        return json({ tt, expiresAt });
+      }
+      case "teacher_logout": {
+        if (b.tt) await db.from("board_teacher_sessions").delete().eq("token_hash", await sha256(String(b.tt)));
+        return json({ ok: true });
+      }
       case "verify": needTeacher(); return json({ ok: true });
       case "change_pw": {
         needTeacher();
         const next = String(b.newPw ?? "");
         if (next.length < 6) throw new Fail("새 비밀번호는 6자 이상으로 정해 주세요.");
-        await db.from("board_settings").update({ value: await sha256(next) }).eq("key", "teacher_pw_sha256");
+        await setSetting("teacher_pw_sha256", await sha256(next));
+        // 다른 기기에 남아 있는 교사 로그인은 모두 끝내고, 지금 기기만 유지해요.
+        await db.from("board_teacher_sessions").delete().neq("token_hash", await sha256(String(b.tt)));
         return json({ ok: true });
       }
       case "set_cross_class": {
