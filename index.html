@@ -410,6 +410,7 @@ textarea.f{resize:vertical;min-height:72px}
     <strong><svg class="ver" viewBox="0 0 16 16" aria-label="선생님 인증"><circle cx="8" cy="8" r="8" style="fill:var(--ver,#0095f6)"/><path d="M4.6 8.2l2.2 2.2 4.6-4.7" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> 교사 모드</strong>
     <button class="btn" id="tplBtn">글 템플릿</button>
     <button class="btn" id="rosterBtn">학생 명단·PIN</button>
+    <button class="btn" id="ccBtn" aria-pressed="false">다른 반 보기: 꺼짐</button>
     <button class="btn" id="zipBtn">이 반 사진 모두 내려받기</button>
     <button class="btn" id="pwBtn">비밀번호 바꾸기</button>
     <button class="btn" id="teacherOut">나가기</button>
@@ -665,27 +666,22 @@ async function admin(action, extra = {}){
 function applyData(d){
   const sig = JSON.stringify(d);
   if (sig === S.sig) return;
-  S.sig = sig; S.posts = d.posts; S.comments = d.comments;
+  S.sig = sig; S.posts = d.posts; S.comments = d.comments; S.crossClass = !!d.crossClass; S.mosaic = d.mosaic || [];
   render();
   if (S.open) renderDetail(true);
 }
+/* 작품·댓글은 서버(board-admin)가 권한에 맞게 걸러서 내려줘요: 교사는 전체, 학생은 자기 반(교사가 허용하면 전체). */
 async function load(){
   try {
-    const [p, c, cfg] = await Promise.all([
-      sb.from('board_posts').select('*').order('created_at', { ascending: false }),
-      sb.from('board_comments').select('*').order('created_at'),
-      sb.from('board_config').select('key,value'),
-    ]);
-    if (!cfg.error && cfg.data) S.template = (cfg.data.find(r => r.key === 'post_template') || {}).value || '';
-    if (p.error || c.error) throw new Error('게시판을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
-    applyData({ posts: p.data, comments: c.data });
+    const d = await admin('feed');
+    S.template = d.template || '';
+    applyData({ posts: d.posts || [], comments: d.comments || [], crossClass: d.crossClass, mosaic: d.mosaic });
   } catch(e){ toast(errMsg(e)); }
 }
 let loadT;
 const soon = () => { clearTimeout(loadT); loadT = setTimeout(load, 300); };
 sb.channel('board')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'board_posts' }, soon)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'board_comments' }, soon)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'board_ping' }, soon)
   .subscribe();
 setInterval(() => { if (!document.hidden) load(); }, 90000);
 
@@ -698,12 +694,13 @@ function renderWho(){
   const c = $('#changeMe'); if (c) c.onclick = () => { $('#meT').textContent = S.me.id + ' ' + S.me.name; openOv('#meOv'); };
   $('#teacherbar').hidden = !S.pw;
 }
+function clearData(){ S.posts = []; S.comments = []; S.sig = ''; }
 function logoutLocal(){
-  S.me = null; store.del('artboard-me'); renderWho(); render();
+  S.me = null; store.del('artboard-me'); if (!S.pw) clearData(); renderWho(); render();
   $('#stepLogin').hidden = false; $('#stepNewPin').hidden = true; $('#inPin').value = '';
 }
 let pendingMe = null;
-function enterBoard(){ S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); }
+function enterBoard(){ S.me = pendingMe; pendingMe = null; store.set('artboard-me', S.me); S.tab = classOf(S.me.id); closeOv($('#loginOv')); renderWho(); render(); load(); }
 $('#loginGo').onclick = async () => {
   const id = $('#inId').value.replace(/\s/g,''), name = $('#inName').value.replace(/\s/g,''), pin = $('#inPin').value.trim();
   if (!/^\d{4,6}$/.test(id)) return toast('학번은 숫자 4~6자리로 적어 주세요.');
@@ -737,7 +734,7 @@ $('#mePinGo').onclick = async () => {
 };
 $('#logoutBtn').onclick = async () => {
   try { await admin('logout'); } catch(e){}
-  closeOv($('#meOv')); logoutLocal(); openOv('#loginOv');
+  closeOv($('#meOv')); logoutLocal(); openOv('#loginOv'); load();
 };
 
 /* ---------- 글 템플릿 (교사) ---------- */
@@ -844,12 +841,20 @@ $('#teacherGo').onclick = async () => {
   try {
     S.pw = pw; await admin('verify');
     store.set('artboard-pw', pw, true); $('#inPw').value = '';
-    closeOv($('#teacherOv')); renderWho(); render(); toast('교사 모드로 들어왔어요.');
+    closeOv($('#teacherOv')); renderWho(); render(); load(); toast('교사 모드로 들어왔어요.');
   } catch(e){ S.pw = null; toast(errMsg(e)); }
   b.disabled = false;
 };
 $('#inPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('#teacherGo').click(); });
-$('#teacherOut').onclick = () => { S.pw = null; store.del('artboard-pw', true); renderWho(); render(); if (!S.me) openOv('#loginOv'); };
+$('#teacherOut').onclick = () => { S.pw = null; store.del('artboard-pw', true); clearData(); renderWho(); render(); load(); if (!S.me) openOv('#loginOv'); };
+$('#ccBtn').onclick = async () => {
+  const next = !S.crossClass;
+  if (!confirm(next ? '학생들이 다른 반 작품도 볼 수 있게 할까요? (댓글은 자기 반 작품에만 달 수 있어요)' : '학생들이 자기 반 작품만 보게 할까요?')) return;
+  const b = $('#ccBtn'); b.disabled = true;
+  try { await admin('set_cross_class', { on: next }); await load(); toast(next ? '이제 학생들이 다른 반 작품도 볼 수 있어요.' : '이제 학생들은 자기 반 작품만 볼 수 있어요.'); }
+  catch(e){ toast(errMsg(e)); }
+  b.disabled = false;
+};
 $('#pwBtn').onclick = () => { openOv('#pwOv'); setTimeout(() => $('#inNewPw').focus(), 50); };
 $('#pwGo').onclick = async () => {
   const next = $('#inNewPw').value;
@@ -893,9 +898,9 @@ $('#zipBtn').onclick = async () => {
 function openPost(id){ S.open = id; renderDetail(); openOv('#detailOv'); }
 const TILE = ['#FF5C39','#FFE45C','#7B61FF','#2EC4B6','#FF9F1C','#E2DCFA'];
 function renderMosaic(){
-  const ps = S.posts.slice(0, 14);
+  const ps = (S.mosaic || []).slice(0, 14);
   const one = ps.length >= 4
-    ? ps.map(p => `<img src="${pub(p.thumb_path)}" alt="" loading="lazy">`).join('')
+    ? ps.map(t => `<img src="${pub(t)}" alt="" loading="lazy">`).join('')
     : TILE.map((c, i) => `<i style="background:${c};aspect-ratio:${[3/4, 1, 4/5, 2/3, 1, 5/4][i]}"></i>`).join('').repeat(2);
   $('#mosaic').innerHTML = one + one;
 }
@@ -905,8 +910,11 @@ function render(){
   const myClass = S.me ? classOf(S.me.id) : null;
   if (myClass && !classes.includes(myClass)) classes.push(myClass);
   classes.sort((a, b) => a.localeCompare(b, 'ko', { numeric: true }));
-  if (S.tab !== '전체' && !classes.includes(S.tab)) S.tab = '전체';
-  $('#tabs').innerHTML = ['전체', ...classes].map(t => `<button class="story" aria-pressed="${t === S.tab}" data-tab="${esc(t)}">
+  // 학생은 교사가 '다른 반 보기'를 켰을 때만 '전체'와 다른 반 탭이 보여요 (서버도 자기 반 작품만 보내요).
+  const tabs = (S.pw || S.crossClass || !S.me) ? ['전체', ...classes] : classes;
+  if (!tabs.includes(S.tab)) S.tab = tabs[0] || '전체';
+  const cc = $('#ccBtn'); cc.textContent = '다른 반 보기: ' + (S.crossClass ? '켜짐' : '꺼짐'); cc.setAttribute('aria-pressed', !!S.crossClass);
+  $('#tabs').innerHTML = tabs.map(t => `<button class="story" aria-pressed="${t === S.tab}" data-tab="${esc(t)}">
       <span class="ring"><span>${t === '전체' ? 'ALL' : esc(t)}</span></span>${t === '전체' ? '전체' : esc(t) + '반'}</button>`).join('');
   $('#tabs').querySelectorAll('.story').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; render(); });
   $('#vFeed').setAttribute('aria-pressed', S.view === 'feed');
@@ -961,6 +969,8 @@ function renderDetail(keepDraft){
   if (S.pw) acts.push(`<button class="btn" id="dlPost">원본 내려받기</button>`);
   if (S.pw || mine) acts.push(`<button class="btn danger" id="delPost">작품 지우기</button>`);
   const pAv = av(p.student_id + p.name, short(p.name), 'sm');
+  // 학생은 자기 반 작품에만 댓글을 달 수 있어요 (서버에서도 막아요).
+  const canComment = S.pw || !S.me || classOf(S.me.id) === classOf(p.student_id);
   $('#detail').innerHTML = `
     <button class="close" id="dClose" aria-label="닫기">×</button>
     <div class="dimg"><img src="${pub(p.image_path)}" alt="${esc(p.title)}"></div>
@@ -975,19 +985,22 @@ function renderDetail(keepDraft){
           return `<div class="cm ${t ? 'teacher' : ''}">${t ? tAv('sm') : av(c.student_id + c.name, short(c.name), 'sm')}
             <div><div class="bub"><p><b>${t ? '선생님' + VER : esc(c.student_id + ' ' + c.name)}</b>${esc(c.body)}</p></div>
             <small><span>${rel(c.created_at)}</span>${(S.pw || own) ? `<button data-del="${c.id}">지우기</button>` : ''}</small></div></div>`;
-        }).join('') : `<div class="nocm"><strong>아직 댓글이 없어요</strong>무엇이 눈에 띄었는지, 어떤 느낌이 드는지 남겨 보세요.</div>`}
+        }).join('') : `<div class="nocm"><strong>아직 댓글이 없어요</strong>${canComment ? '무엇이 눈에 띄었는지, 어떤 느낌이 드는지 남겨 보세요.' : ''}</div>`}
       </div>
-      <div class="dfoot"><div class="cform">${S.pw ? tAv('sm') : S.me ? av(S.me.id + S.me.name, short(S.me.name), 'sm') : ''}
+      ${canComment ? `<div class="dfoot"><div class="cform">${S.pw ? tAv('sm') : S.me ? av(S.me.id + S.me.name, short(S.me.name), 'sm') : ''}
         <textarea id="cText" rows="1" maxlength="500" aria-label="${S.pw ? '피드백 쓰기' : '감상 쓰기'}" placeholder="${S.pw ? '피드백 남기기…' : '감상 남기기…'}"></textarea>
-        <button id="cSend">게시</button></div></div>
+        <button id="cSend">게시</button></div></div>`
+      : `<div class="dfoot"><p class="hint" style="margin:6px 0;text-align:center">다른 반 작품은 감상만 할 수 있고 댓글은 달 수 없어요.</p></div>`}
     </div>`;
   const ta = $('#cText');
-  ta.value = draft;
-  const grow = () => { ta.style.height = '38px'; ta.style.height = Math.max(38, Math.min(ta.scrollHeight, 110)) + 'px'; };
-  ta.oninput = grow; grow();
+  if (ta) {
+    ta.value = draft;
+    const grow = () => { ta.style.height = '38px'; ta.style.height = Math.max(38, Math.min(ta.scrollHeight, 110)) + 'px'; };
+    ta.oninput = grow; grow();
+    $('#cSend').onclick = sendComment;
+  }
   $('#dscroll').scrollTop = keepScroll;
   $('#dClose').onclick = () => closeOv($('#detailOv'));
-  $('#cSend').onclick = sendComment;
   const dp = $('#delPost'); if (dp) dp.onclick = delPost;
   const dl = $('#dlPost'); if (dl) dl.onclick = async () => { try { saveBlob(await fetchBlob(p.image_path), p.file_name); } catch(e){ toast(errMsg(e)); } };
   $('#detail').querySelectorAll('[data-del]').forEach(b => b.onclick = () => delComment(b.dataset.del));
