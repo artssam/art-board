@@ -518,12 +518,21 @@ textarea.f{resize:vertical;min-height:72px}
 :root[data-font="jua"]{--font:'Gowun Dodum';--font-title:'Jua';--font-ttl:'Jua';--tw:400}
 :root[data-font="hahmlet"]{--font:'IBM Plex Sans KR';--font-title:'Hahmlet';--font-ttl:'Hahmlet';--tw:800}
 :root[data-font="gasoek"]{--font:'Noto Sans KR';--font-title:'Gasoek One';--font-ttl:'Gothic A1';--tw:400}
+:root[data-font="pretendard"]{--font:'Pretendard Variable';--font-title:'Pretendard Variable';--font-ttl:'Pretendard Variable';--tw:700}
 :root[data-font] .logo,:root[data-font] .lform .brandbig,:root[data-font] #loginBrand{font-weight:var(--tw)!important;letter-spacing:-.01em}
 :root[data-font] .pcap .ttl,:root[data-font] .cm .ttl{font-weight:var(--tw)}
 :root[data-font="gasoek"] .pcap .ttl,:root[data-font="gasoek"] .cm .ttl{font-weight:800}
 :root[data-font] .story .ring span{font-family:var(--font-title)!important;font-weight:var(--tw)}
 :root[data-font] .newbtn,:root[data-font] .btn,:root[data-font] input,:root[data-font] textarea{font-family:var(--font)}
 :root[data-font] .logo .headsub{font-family:var(--font)}
+/* 상세 보기: 글씨를 크기 3단계(16/14/12) · 두께 2단계(400/700) · 글꼴 1종으로 정리 */
+#detail{--fs-ttl:16px;--fs-body:14px;--fs-meta:12px}
+#detail .ph b,#detail .cm b{font-size:var(--fs-body);font-weight:700}
+#detail .ph small,#detail .cm small,#detail .autonext{font-size:var(--fs-meta);font-weight:400}
+#detail .cm p{font-size:var(--fs-body);font-weight:400}
+#detail .cm .ttl{font-family:var(--font);font-size:var(--fs-ttl);font-weight:700;margin:4px 0 8px}
+#detail .acts .btn,#detail .vis label,#detail .cform button{font-size:var(--fs-body);font-weight:700}
+#detail .cform textarea{font-size:var(--fs-body)}
 #loginBrand{white-space:nowrap}
 .lform .brandbig{font-size:clamp(30px,4.6vw,42px)}
 [data-skin="sketch"] .lform .brandbig{font-size:clamp(34px,5vw,48px)}
@@ -844,7 +853,7 @@ const SUPABASE_URL = 'https://fikehztdtvnwesfnnyzl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpa2VoenRkdHZud2VzZm5ueXpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3NzUyNzAsImV4cCI6MjEwOTM1MTI3MH0.n5FzF4pnv0fLz6-I0_jLx2LYNE6KeKbeAMQN53UCihg';
 const BUCKET = 'board-artworks';
 const SKIN = 'pop';   // 디자인: 'pop'(팝) | 'gallery'(갤러리) | 'sketch'(스케치북) | 'feed'(인스타)
-const FONT = 'dohyeon';   // 글꼴: 'dohyeon'(도현) | 'jua'(주아) | 'hahmlet'(함렛) | 'gasoek'(가석원) | 'skin'(디자인 기본)
+const FONT = 'pretendard';   // 글꼴: 'pretendard'(프리텐다드) | 'dohyeon'(도현) | 'jua'(주아) | 'hahmlet'(함렛) | 'gasoek'(가석원) | 'skin'(디자인 기본)
 /* ==================================== */
 
 document.title = BOARD_TITLE + (BOARD_SUBTITLE ? ' · ' + BOARD_SUBTITLE : '');
