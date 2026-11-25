@@ -236,6 +236,18 @@ textarea.f{resize:vertical;min-height:72px}
 .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:20px;display:grid;place-items:center;z-index:2}
 .nav.prev{left:8px}.nav.next{right:8px}
 .nav:disabled{opacity:.25}
+/* 작품 크게 보기 */
+.dimg img{cursor:zoom-in}
+.zbtn{position:absolute;right:8px;bottom:8px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center;z-index:2}
+#zoomOv{position:fixed;inset:0;z-index:40;background:#000;overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#zoomOv[hidden]{display:none}
+#zoomOv.drag{cursor:grabbing}
+#zoomImg{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;max-height:none;-webkit-user-drag:none;pointer-events:none}
+.zbar{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.6);padding:4px;border-radius:999px;color:#fff;border:1px solid rgba(255,255,255,.2);white-space:nowrap}
+.zbar button{min-width:44px;height:44px;border-radius:999px;color:#fff;font-size:22px;font-weight:700;padding:0 10px;white-space:nowrap}
+.zbar #zFit{font-size:14px}
+.zbar output{min-width:52px;text-align:center;font-size:13px;font-variant-numeric:tabular-nums}
+.zclose{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));right:8px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:28px;line-height:1;border:1px solid rgba(255,255,255,.2)}
 .dcount{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:2px 10px;border-radius:999px}
 /* 피드백 상용구·자동 넘김 */
 .snips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
@@ -843,6 +855,12 @@ textarea.f{resize:vertical;min-height:72px}
 <div class="overlay" id="detailOv">
   <div class="sheet detail" id="detail" role="dialog" aria-label="작품 보기"></div>
 </div>
+<!-- 작품 크게 보기 -->
+<div id="zoomOv" hidden role="dialog" aria-label="작품 크게 보기">
+  <img id="zoomImg" alt="">
+  <button class="zclose" id="zClose" aria-label="크게 보기 닫기">×</button>
+  <div class="zbar"><button id="zOut" aria-label="축소">−</button><output id="zPct">100%</output><button id="zIn" aria-label="확대">+</button><button id="zFit">화면 맞춤</button></div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
@@ -918,7 +936,7 @@ function toast(m, act){
   t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), act ? 8000 : 3200);
 }
 function openOv(id){ $(id).classList.add('open'); }
-function closeOv(el){ el.classList.remove('open'); if (el.id === 'detailOv') S.open = null; }
+function closeOv(el){ el.classList.remove('open'); if (el.id === 'detailOv') { S.open = null; closeZoom(); } }
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeOv(b.closest('.overlay')));
 document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o && o.id !== 'loginOv') closeOv(o); }));
 document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => { if (o.id !== 'loginOv') closeOv(o); }); });
@@ -1459,7 +1477,7 @@ function renderDetail(keepDraft){
   $('#detail').classList.toggle('noimg', !p.image_path);
   $('#detail').innerHTML = `
     <button class="close" id="dClose" aria-label="닫기">×</button>
-    <div class="dimg">${navHtml}${p.image_path ? `<img src="${pub(p.image_path)}" alt="${esc(p.title)}">` : ''}</div>
+    <div class="dimg">${navHtml}${p.image_path ? `<img src="${pub(p.image_path)}" alt="${esc(p.title)}" title="누르면 크게 볼 수 있어요"><button class="zbtn" id="dZoom" aria-label="크게 보기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/></svg></button>` : ''}</div>
     <div class="dside">
       <div class="ph">${who}${p.pinned ? '<span class="pin">📌 고정</span>' : ''}</div>
       <div class="dscroll" id="dscroll">
@@ -1506,6 +1524,8 @@ function renderDetail(keepDraft){
   const pv_ = $('#dPrev'), nx = $('#dNext');
   if (pv_) pv_.onclick = () => stepPost(-1);
   if (nx) nx.onclick = () => stepPost(1);
+  const di = $('#detail .dimg img');
+  if (di) di.onclick = $('#dZoom').onclick = () => openZoom(di.src, di.alt);
 }
 function stepPost(d){
   const ids = S.listIds || [], i = ids.indexOf(S.open);
@@ -1518,6 +1538,91 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') { if (stepPost(-1)) e.preventDefault(); }
   if (e.key === 'ArrowRight') { if (stepPost(1)) e.preventDefault(); }
 });
+
+/* ---------- 작품 크게 보기: 휠·두 손가락으로 확대, 끌어서 이동, 두 번 누르면 확대/맞춤 ---------- */
+const Z = { s: 1, x: 0, y: 0, fit: 1, w: 0, h: 0, pts: new Map(), moved: false, tap: null };
+function zEl(){ return [$('#zoomOv'), $('#zoomImg')]; }
+function zMax(){ return Math.max(Z.fit * 6, 3); }
+function zApply(){
+  const [zo, zi] = zEl(), W = zo.clientWidth, H = zo.clientHeight, w = Z.w * Z.s, h = Z.h * Z.s;
+  Z.x = w <= W ? (W - w) / 2 : Math.min(0, Math.max(W - w, Z.x));
+  Z.y = h <= H ? (H - h) / 2 : Math.min(0, Math.max(H - h, Z.y));
+  zi.style.transform = `translate(${Z.x}px,${Z.y}px) scale(${Z.s})`;
+  $('#zPct').textContent = Math.round(Z.s / Z.fit * 100) + '%'; // 화면 맞춤 = 100%
+}
+function zFitView(){ const [zo] = zEl(); if (!Z.w) return; Z.fit = Math.min(zo.clientWidth / Z.w, zo.clientHeight / Z.h); Z.s = Z.fit; zApply(); }
+function zAt(s, cx, cy){
+  s = Math.min(Math.max(s, Z.fit), zMax());
+  Z.x = cx - (cx - Z.x) * s / Z.s; Z.y = cy - (cy - Z.y) * s / Z.s; Z.s = s; zApply();
+}
+function zCenter(f){ const [zo] = zEl(); zAt(Z.s * f, zo.clientWidth / 2, zo.clientHeight / 2); }
+function openZoom(src, alt){
+  const [zo, zi] = zEl();
+  zo.hidden = false; zi.alt = alt || ''; Z.w = 0; zi.style.transform = 'scale(0)';
+  zi.onload = () => { Z.w = zi.naturalWidth; Z.h = zi.naturalHeight; zFitView(); };
+  if (zi.getAttribute('src') === src && zi.complete && zi.naturalWidth) zi.onload(); else zi.src = src;
+  $('#zClose').focus();
+}
+function closeZoom(){ const [zo] = zEl(); if (!zo || zo.hidden) return; zo.hidden = true; Z.pts.clear(); zo.classList.remove('drag'); }
+(() => {
+  const [zo] = zEl();
+  zo.addEventListener('pointerdown', e => {
+    if (e.target.closest('button, output')) return;
+    zo.setPointerCapture(e.pointerId); Z.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (Z.pts.size === 1) Z.moved = false;
+    zo.classList.add('drag');
+  });
+  zo.addEventListener('pointermove', e => {
+    const p = Z.pts.get(e.pointerId); if (!p) return;
+    if (Math.abs(e.clientX - p.x) + Math.abs(e.clientY - p.y) > 3) Z.moved = true;
+    if (Z.pts.size === 1) { Z.x += e.clientX - p.x; Z.y += e.clientY - p.y; zApply(); }
+    else if (Z.pts.size === 2) {
+      const o = [...Z.pts.entries()].find(([id]) => id !== e.pointerId)[1];
+      const d0 = Math.hypot(p.x - o.x, p.y - o.y), d1 = Math.hypot(e.clientX - o.x, e.clientY - o.y);
+      const mx0 = (p.x + o.x) / 2, my0 = (p.y + o.y) / 2, mx1 = (e.clientX + o.x) / 2, my1 = (e.clientY + o.y) / 2;
+      Z.x += mx1 - mx0; Z.y += my1 - my0;
+      if (d0 > 0) zAt(Z.s * d1 / d0, mx1, my1); else zApply();
+    }
+    p.x = e.clientX; p.y = e.clientY;
+  });
+  const up = e => {
+    if (!Z.pts.has(e.pointerId)) return;
+    const single = Z.pts.size === 1; Z.pts.delete(e.pointerId);
+    if (!Z.pts.size) zo.classList.remove('drag');
+    if (!single || Z.moved || e.type === 'pointercancel') { Z.tap = null; return; }
+    // 두 번 누르기: 확대 ↔ 화면 맞춤
+    const now = Date.now(), t = Z.tap;
+    if (t && now - t.at < 350 && Math.hypot(e.clientX - t.x, e.clientY - t.y) < 30) {
+      Z.tap = null;
+      if (Z.s > Z.fit * 1.05) zFitView(); else zAt(Z.fit * 3, e.clientX, e.clientY);
+    } else Z.tap = { at: now, x: e.clientX, y: e.clientY };
+  };
+  zo.addEventListener('pointerup', up); zo.addEventListener('pointercancel', up);
+  zo.addEventListener('wheel', e => { e.preventDefault(); zAt(Z.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX, e.clientY); }, { passive: false });
+  $('#zIn').onclick = () => zCenter(1.5);
+  $('#zOut').onclick = () => zCenter(1 / 1.5);
+  $('#zFit').onclick = zFitView;
+  $('#zClose').onclick = closeZoom;
+  window.addEventListener('resize', () => {
+    if (zo.hidden || !Z.w) return;
+    const wasFit = Z.s <= Z.fit * 1.001;
+    Z.fit = Math.min(zo.clientWidth / Z.w, zo.clientHeight / Z.h);
+    if (wasFit || Z.s < Z.fit) Z.s = Z.fit; zApply();
+  });
+  // 크게 보기 중에는 키를 여기서만 받아요 (Esc는 크게 보기만 닫고, 방향키로 작품이 넘어가지 않게).
+  document.addEventListener('keydown', e => {
+    if (zo.hidden) return;
+    const k = e.key;
+    if (k === 'Escape') closeZoom();
+    else if (k === '+' || k === '=') zCenter(1.5);
+    else if (k === '-' || k === '_') zCenter(1 / 1.5);
+    else if (k === '0') zFitView();
+    else if (k.startsWith('Arrow')) { const d = 60; Z.x += k === 'ArrowLeft' ? d : k === 'ArrowRight' ? -d : 0; Z.y += k === 'ArrowUp' ? d : k === 'ArrowDown' ? -d : 0; zApply(); }
+    else if (k !== 'Tab' && k !== 'Enter' && k !== ' ') return;
+    if (k !== 'Tab' && k !== 'Enter' && k !== ' ') e.preventDefault();
+    e.stopImmediatePropagation();
+  }, true);
+})();
 function editComment(id){
   const c = S.comments.find(x => x.id === id), box = $(`[data-c="${id}"] .bub`); if (!c || !box) return;
   box.outerHTML = `<div class="cedit"><textarea id="ceText" maxlength="500" aria-label="피드백 고치기"></textarea><div class="vis" role="radiogroup" aria-label="공개 범위" style="margin-top:6px"><label><input type="radio" name="cevis" value="public" ${c.visibility !== 'private' ? 'checked' : ''}> 공개</label><label><input type="radio" name="cevis" value="private" ${c.visibility === 'private' ? 'checked' : ''}> 🔒 본인만</label></div><div class="row"><button class="btn" id="ceCancel">취소</button><button class="btn primary" id="ceSave">저장</button></div></div>`;
