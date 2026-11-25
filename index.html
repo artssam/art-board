@@ -832,6 +832,7 @@ textarea.f{resize:vertical;min-height:72px}
       <input class="f" id="inTitle" maxlength="60" placeholder="제목이 없으면 ‘무제’로 올라가요">
       <div class="dlabel"><label class="f" for="inDesc">작품 설명</label><button class="btn link" id="tplReload" hidden>템플릿 다시 넣기</button></div>
       <textarea class="f" id="inDesc" maxlength="1000" rows="7" placeholder="무엇을, 왜 표현했는지 적어 보세요"></textarea>
+      <p class="hint" id="draftNote" aria-live="polite"></p>
       <label class="autonext" id="inPinRow" hidden style="margin-top:10px;font-size:14px;color:var(--text)"><input type="checkbox" id="inPinned" checked> 과제 맨 위에 고정하기</label>
       <div class="upfoot" id="upFoot"><button class="btn primary" id="submitBtn">작품 올리기</button></div>
     </div>
@@ -988,6 +989,8 @@ function checkIdle(){
 setInterval(checkIdle, 20000);
 function clearData(){ S.posts = []; S.comments = []; S.sig = ''; }
 function logoutLocal(){
+  if (draftTimer) saveDraft();
+  if (!S.upTeacher) { $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; S.editing = null; S.upKey = null; $('#draftNote').textContent = ''; }
   S.me = null; store.del('artboard-me'); if (!S.pw) clearData(); renderWho(); render();
   $('#stepLogin').hidden = false; $('#stepNewPin').hidden = true; $('#inPin').value = '';
 }
@@ -1163,6 +1166,7 @@ $('#teacherGo').onclick = async () => {
   b.disabled = false;
 };
 function endTeacher(msg){
+  if (draftTimer) saveDraft();
   S.pw = null; store.del('artboard-tt'); store.del('artboard-tt', true);
   document.querySelectorAll('.overlay.open').forEach(o => { if (o.id !== 'loginOv') closeOv(o); });
   clearData(); renderWho(); render(); load(); if (!S.me) openOv('#loginOv');
@@ -1557,6 +1561,44 @@ async function delPost(){
 const E = { base: null, rot90: null, flat: null, geom: null, rot: 0, angle: 0, pts: null, fp: null, crop: null, sel: null, ratio: 'free', mode: null, drag: null, grid: false, auto: null, adj: { b: 0, c: 0, s: 0, t: 0 } };
 const pv = $('#preview');
 
+/* 임시저장: 쓰는 동안 제목·설명·과제를 이 기기에 저장해 둬요 (사진은 크기가 커서 빼요).
+   학생마다, 새 글/고치는 글마다 따로 저장하고, 올리면 지워요. 7일이 지나면 버려요. */
+const DRAFT_DAYS = 7;
+let draftTimer = null;
+const hhmm = t => new Date(t).toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+function draftKey(){
+  const who = S.upTeacher ? (S.pw && 'teacher') : (S.me && S.me.id);
+  return who && S.upKey ? 'artboard-draft:' + who + ':' + (S.editing || 'new') : null;
+}
+function saveDraft(){
+  clearTimeout(draftTimer); draftTimer = null;
+  const k = draftKey(); if (!k) return;
+  const t = $('#inTitle').value, d = $('#inDesc').value;
+  if (!t.trim() && (!d.trim() || d.trim() === (S.lastTpl || '').trim())) { store.del(k); $('#draftNote').textContent = ''; return; }
+  const at = Date.now();
+  store.set(k, { t, d, a: S.editing ? null : $('#inAssign').value, at });
+  $('#draftNote').textContent = '글 임시저장됨 · ' + hhmm(at);
+}
+function saveDraftSoon(){ clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 500); }
+function clearDraft(){ const k = draftKey(); if (k) store.del(k); $('#draftNote').textContent = ''; }
+function restoreDraft(){
+  const k = draftKey(), v = k && store.get(k);
+  if (!v || Date.now() - v.at > DRAFT_DAYS * 864e5) { if (k) store.del(k); $('#draftNote').textContent = ''; return false; }
+  const changed = $('#inTitle').value !== v.t || $('#inDesc').value !== v.d;
+  $('#inTitle').value = v.t; $('#inDesc').value = v.d;
+  const sel = $('#inAssign');
+  if (!S.editing && v.a && [...sel.options].some(o => o.value === v.a)) {
+    sel.value = v.a; S.lastTpl = S.upTeacher ? '' : tplOf(v.a); $('#tplReload').hidden = S.upTeacher || !S.lastTpl;
+  }
+  $('#draftNote').textContent = '임시저장된 글 · ' + hhmm(v.at);
+  if (changed) toast('임시저장해 둔 글을 불러왔어요.');
+  return true;
+}
+$('#inTitle').addEventListener('input', saveDraftSoon);
+$('#inDesc').addEventListener('input', saveDraftSoon);
+window.addEventListener('pagehide', () => { if (draftTimer) saveDraft(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && draftTimer) saveDraft(); });
+
 /* 올리기 창 모드: 학생 새 작품 / 학생 작품 수정 / 교사 게시물(새로·수정). 교사 게시물은 사진 없이 공지만 쓸 수도 있어요. */
 function setUpMode(editing, teacher){
   const key = (teacher ? 't:' : 's:') + (editing || '');
@@ -1588,17 +1630,18 @@ $('#inAssign').onchange = () => {
   const cur = $('#inDesc').value.trim(), next = tplOf($('#inAssign').value);
   if (!S.upTeacher && (!cur || cur === (S.lastTpl || '').trim())) $('#inDesc').value = next;
   S.lastTpl = next; $('#tplReload').hidden = S.upTeacher || !next;
+  saveDraft();
 };
 $('#fab').onclick = () => {
   if (!S.me && !S.pw) return openOv('#loginOv');
   if (!S.me) return toast('교사 모드에서는 작품을 올릴 수 없어요. 학생 학번으로 들어와 주세요.');
   if (!setUpMode(null, false)) return toast('지금 올릴 수 있는 과제가 없어요. 선생님께 여쭤보세요.');
-  if (!$('#inDesc').value.trim() && S.lastTpl) $('#inDesc').value = S.lastTpl;
+  if (!restoreDraft() && !$('#inDesc').value.trim() && S.lastTpl) $('#inDesc').value = S.lastTpl;
   setNoPhoto(false); showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
 };
 $('#tpostBtn').onclick = () => {
   if (!S.assign.length) return toast('먼저 과제를 하나 만들어 주세요.');
-  setUpMode(null, true); setNoPhoto(false); showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
+  setUpMode(null, true); restoreDraft(); setNoPhoto(false); showStep(E.rot90 ? 'edit' : 'pick'); openOv('#upOv');
 };
 $('#noPhotoBtn').onclick = () => setNoPhoto(true);
 $('#addPhoto').onclick = () => showStep('pick');
@@ -1608,6 +1651,7 @@ async function editPost(p){
     const blob = p.image_path ? (toast('불러오는 중…'), await fetchBlob(p.image_path)) : null;
     setUpMode(p.id, teacher);
     $('#inTitle').value = p.title === '무제' ? '' : p.title; $('#inDesc').value = p.description || '';
+    restoreDraft();
     closeOv($('#detailOv')); openOv('#upOv');
     if (blob) { setNoPhoto(false); loadFile(blob, false); } else setNoPhoto(true);
   } catch(e){ toast(errMsg(e)); }
@@ -2023,6 +2067,7 @@ $('#submitBtn').onclick = async () => {
     if (editing) await admin('update_post', { postId: editing, ...fields });
     else if (teacher) await admin('create_teacher_post', { assignmentId: aid, pinned: $('#inPinned').checked, ...fields });
     else await admin('create_post', { assignmentId: aid, ...fields });
+    clearDraft();
     $('#inTitle').value = ''; $('#inDesc').value = ''; E.base = E.rot90 = null; S.editing = null; S.upKey = null; setNoPhoto(false);
     closeOv($('#upOv'));
     if (!teacher) S.tab = classOf(S.me.id);
