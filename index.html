@@ -445,6 +445,45 @@ textarea.f{resize:vertical;min-height:72px}
 [data-skin="pop"] .mtrack img,[data-skin="pop"] .mtrack i{border:2px solid #17141F}
 [data-skin="pop"] .lform .brandbig{font-weight:400}
 
+/* ===================== 디자인 5: 파스텔 (친구 작품 감상 웹앱 스타일) ===================== */
+:root[data-skin="pastel"]{--bg:#FFFAF4;--text:#1B2340;--muted:#6B6F82;--line:#ECE8F4;--soft:#F4F1FB;--card:#fff;--blue:#7B5CF0;--blue-ink:#4A33B8;--tbg:#EEEAFF;--ver:#7B5CF0;--danger:#E5486A;
+  --ring:linear-gradient(45deg,#FFB8CB,#C9B8FF 55%,#9EE3C8);--font:'Pretendard Variable';--font-title:'Pretendard Variable';--font-ttl:'Pretendard Variable';--tw:800;--m-radius:16px;
+  --sh:0 12px 32px -14px rgba(60,50,120,.22);--mark-bg:linear-gradient(135deg,#FF9FBA,#9B7CF5);
+  --pastel-bg:radial-gradient(42vw 42vw at 0% 0%,rgba(255,196,214,.45),transparent 70%),radial-gradient(42vw 42vw at 100% 0%,rgba(214,200,255,.5),transparent 70%),radial-gradient(46vw 46vw at 0% 100%,rgba(190,240,214,.45),transparent 70%),#FFFAF4;color-scheme:light}
+[data-skin="pastel"] body{background:var(--pastel-bg);background-attachment:fixed}
+[data-skin="pastel"] .top{background:rgba(255,250,244,.78);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+[data-skin="pastel"] .logo{letter-spacing:-.03em}
+[data-skin="pastel"] .kicker{color:var(--blue);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+[data-skin="pastel"] .newbtn{background:var(--blue);color:#fff;box-shadow:0 8px 18px -8px rgba(123,92,240,.7)}
+[data-skin="pastel"] .story .ring span{border-color:#FFFAF4;background:#fff}
+[data-skin="pastel"] .viewbar{border-top:0}
+[data-skin="pastel"] .feed{padding:14px 14px 0;gap:20px}
+[data-skin="pastel"] .post{border:0;border-radius:24px;box-shadow:var(--sh);overflow:hidden;padding-bottom:14px}
+[data-skin="pastel"] .grid{gap:10px;padding:12px 14px}
+[data-skin="pastel"] .g{border-radius:18px;box-shadow:var(--sh)}
+[data-skin="pastel"] .btn{border-radius:12px}
+[data-skin="pastel"] .btn.primary{background:var(--blue);box-shadow:0 8px 18px -8px rgba(123,92,240,.7)}
+[data-skin="pastel"] .btn.danger{border-color:#F6D3DC}
+[data-skin="pastel"] .overlay{background:rgba(27,35,64,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+[data-skin="pastel"] .sheet{border-radius:24px;box-shadow:0 24px 60px -20px rgba(27,35,64,.35)}
+[data-skin="pastel"] .sheet.detail{border-radius:24px}
+[data-skin="pastel"] input.f,[data-skin="pastel"] textarea.f{background:#fff;border:1.5px solid var(--line);border-radius:14px}
+[data-skin="pastel"] input.f:focus,[data-skin="pastel"] textarea.f:focus{border-color:#C9B8FF;outline:0;box-shadow:0 0 0 4px rgba(123,92,240,.12)}
+[data-skin="pastel"] .cm.teacher .bub{border-radius:16px}
+[data-skin="pastel"] .teacherbar .in{background:linear-gradient(120deg,#EEEAFF,#FFE6EE);border-radius:18px}
+[data-skin="pastel"] #loginOv{background:var(--pastel-bg)}
+[data-skin="pastel"] .mtrack i:nth-child(6n+1){background:#FFC9D6!important}
+[data-skin="pastel"] .mtrack i:nth-child(6n+2){background:#FFE9A8!important}
+[data-skin="pastel"] .mtrack i:nth-child(6n+3){background:#D9CCFF!important}
+[data-skin="pastel"] .mtrack i:nth-child(6n+4){background:#BFEBDD!important}
+[data-skin="pastel"] .mtrack i:nth-child(6n+5){background:#FFD9B8!important}
+[data-skin="pastel"] .mtrack i:nth-child(6n+6){background:#E8E3FF!important}
+[data-skin="pastel"] .dimg{background:#F4F1FB}
+[data-skin="pastel"] .mosaic{background:linear-gradient(160deg,#FFE6EE,#EEEAFF 55%,#E3F7EE)}
+[data-skin="pastel"] .mtrack img,[data-skin="pastel"] .mtrack i{border-radius:16px}
+[data-skin="pastel"] .lform{background:#fff;border-radius:28px;box-shadow:var(--sh);margin:24px}
+@media (max-width:760px){[data-skin="pastel"] .lform{margin:0 14px 24px;max-width:none;width:auto}[data-skin="pastel"] .sheet.detail{border-radius:0}}
+
 /* ===================== 디자인 2: 갤러리 ===================== */
 :root[data-skin="gallery"]{--bg:#F3F3F0;--text:#141414;--muted:#6C6C67;--line:#D4D4CF;--soft:#E7E7E3;--card:#F3F3F0;--blue:#141414;--blue-ink:#4A3D1C;--tbg:#ECE4D1;--ver:#A9822F;
   --font:'Noto Sans KR';--font-title:'Nanum Myeongjo';--font-ttl:'Nanum Myeongjo';--m-radius:0}
@@ -871,7 +910,7 @@ const BOARD_DESC = '작품을 올리고, 친구 작품에 감상을 남겨요'; 
 const SUPABASE_URL = 'https://fikehztdtvnwesfnnyzl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpa2VoenRkdHZud2VzZm5ueXpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3NzUyNzAsImV4cCI6MjEwOTM1MTI3MH0.n5FzF4pnv0fLz6-I0_jLx2LYNE6KeKbeAMQN53UCihg';
 const BUCKET = 'board-artworks';
-const SKIN = 'pop';   // 디자인: 'pop'(팝) | 'gallery'(갤러리) | 'sketch'(스케치북) | 'feed'(인스타)
+const SKIN = 'pastel';   // 디자인: 'pastel'(파스텔) | 'pop'(팝) | 'gallery'(갤러리) | 'sketch'(스케치북) | 'feed'(인스타)
 const FONT = 'pretendard';   // 글꼴: 'pretendard'(프리텐다드) | 'dohyeon'(도현) | 'jua'(주아) | 'hahmlet'(함렛) | 'gasoek'(가석원) | 'skin'(디자인 기본)
 /* ==================================== */
 
